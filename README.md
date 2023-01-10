@@ -5,3 +5,4 @@ This project is the updated version of the FI network construction project. The 
 
 * Integrate the predicted results from the fi-network-ml project together with extracted pathway FIs to develop a FI network database and Cytoscape files so that they can be used to update ReactomeFIViz.
 
+Note: Some of jar files need to be installed locally. Use ant scripts in the ant folder and jar files in the install_jar to do that. Please note the license statement for jacksum.jar.
