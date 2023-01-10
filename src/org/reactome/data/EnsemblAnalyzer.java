@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.ensembl.compara.driver.ComparaDriver;
 import org.junit.Test;
 import org.reactome.fi.util.FIConfiguration;
 import org.reactome.fi.util.FileUtility;
@@ -29,80 +28,6 @@ import org.reactome.fi.util.FileUtility;
  */
 public class EnsemblAnalyzer {
     private static final Logger logger = Logger.getLogger(EnsemblAnalyzer.class);
-    private ComparaDriver driver;
-    
-    protected void setUp() throws Exception {
-//        driver = ComparaDriverFactory.createComparaDriver("ensembldb.ensembl.org", 
-//                                                          3306, 
-//                                                          "ensembl_compara_41", 
-//                                                          "anonymous", 
-//                                                           "");
-    }
-    
-    public void simpleTest() throws Exception {
-        List<String> ids = new ArrayList<String>();
-        ids.add("P26599-2");
-        Map<String, Integer> counts = getGeneCopyNumbers(ids);
-        for (String id : ids)
-            System.out.printf("%s - %d%n", id, counts.get(id));
-    }
-    
-    public int getGeneCopyNumber(String uniProtId) throws Exception {
-        List<String> ids = new ArrayList<String>();
-        ids.add(uniProtId);
-        Map<String, Integer> counts = getGeneCopyNumbers(ids);
-        return counts.get(uniProtId);
-    }
-    
-    public Map<String, Integer> getGeneCopyNumbers(List<String> uniProtIds) throws Exception {
-        if (driver == null)
-            setUp();
-        Map<String, Integer> countMap = new HashMap<String, Integer>();
-        Connection connection = driver.getConnection();
-        String sql = "select f.family_id from family_member f, member m " +
-                     "where m.stable_id = ? and m.member_id = f.member_id";
-        PreparedStatement stat = connection.prepareStatement(sql);
-        // Query for members
-        String sql1 = "select count(m.member_id) from member m, family_member f " +
-                      "where m.member_id = f.member_id and f.family_id = ? " +
-                      "and m.taxon_id = 9606 and m.stable_id like 'ENSG%'";
-        PreparedStatement stat1 = connection.prepareStatement(sql1);
-        String id = null;
-        for (String id1 : uniProtIds) {
-            id = preProcessId(id1);
-            stat.setString(1, id);
-            ResultSet result = stat.executeQuery();
-            Integer familyId = null;
-            while (result.next())
-                familyId = result.getInt(1);
-            result.close();
-            //System.out.println("Family ID for " + id + ": " + familyId);
-            if (familyId == null) {
-                countMap.put(id1, 0);
-                continue;
-            }
-            stat1.setInt(1, familyId);
-            int count = 0;
-            result = stat1.executeQuery();
-            while (result.next())
-                count = result.getInt(1);
-            //System.out.println("Total Gene Number: " + count);
-            countMap.put(id1, count);
-        }
-        stat.close();
-        stat1.close();
-        // Need to close connection so that it can be reused.
-        connection.close();
-        return countMap;
-    }
-    
-    private String preProcessId(String id) {
-        // Don't use variant: it is not in the ensembl database
-        int index = id.indexOf("-");
-        if (index < 0)
-            return id;
-        return id.substring(0, index);
-    }
     
     private Connection getConnection() throws Exception {
         String dbName = FIConfiguration.getConfiguration().get("ENSEMBL_COMPARA_DATABASE");

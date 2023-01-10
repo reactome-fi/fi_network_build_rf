@@ -1,36 +1,44 @@
 <?xml version="1.0"?>
 <!-- ====================================================================== 
-     Jul 1, 2005 3:47:49 PM                                                        
-
-     project    Jar Reactome APIs
-     description Create a jar files from gkdev to be used by caBigR3 project.
-                   
-     guanming                                                                
-     ====================================================================== -->
+	Create a jar file from the pathway exchange project used in this project 
+	and then install it locally for the maven project. ====================================================================== -->
 <project name="PathwayExchangeJar" default="jar" basedir="..">
-	<property name="destDir" value="lib/" />
-	<property name="sourceClsDir" value="/Users/wug/git/Pathway-Exchange/class" />
-		
-	<target name="jar">
-		<mkdir dir="${destDir}" />
-        <jar destfile="${destDir}/pathwayExchange.jar">
-            <fileset dir="${sourceClsDir}">
-            	    <include name="org/biopax/model/**.class" />
-            		<include name="org/biopax/model/impl/**.class" />
-            	    <include name="org/reactome/b2rMapper/**.class" />
-            	    <include name="org/reactome/biopax/**.class" />
-            		<include name="org/reactome/convert/common/**.class" />
-            		<include name="org/reactome/model/**.class" />
-            		<include name="org/reactome/px/util/**.class" />
-            		<include name="org/reactome/gsea/**.class" />
-            		<!-- Don't add .class after **. Otherwise, classes in sub-directories
-            			will not be added -->
-            		<include name="org/gk/sbml/**" />
-            		<include name="org/gk/convert/common/**.class" />
-            		<include name="org/gk/layout/**.class" />
-            		<include name="org/gk/sbgn/**.class" />
-            </fileset>
-        </jar>
-    </target>
+	<property name="sourceClsDir"
+		value="/Users/wug/git/Pathway-Exchange/class" />
+	<property name="targetDir" value="install_jar" />
+	<property name="projectVersion" value="1.0.0" />
+	<property name="projectJar"
+		value="${targetDir}/pathway-exchange-${projectVersion}.jar" />
 
+	<target name="jar">
+		<delete file="${projectJar}" />
+		<jar destfile="${projectJar}">
+			<fileset dir="${sourceClsDir}">
+				<include name="org/biopax/model/**.class" />
+				<include name="org/biopax/model/impl/**.class" />
+				<include name="org/reactome/b2rMapper/**.class" />
+				<include name="org/reactome/biopax/**.class" />
+				<include name="org/reactome/convert/common/**.class" />
+				<include name="org/reactome/model/**.class" />
+				<include name="org/reactome/px/util/**.class" />
+				<include name="org/reactome/gsea/**.class" />
+				<!-- Don't add .class after **. Otherwise, classes in sub-directories 
+					will not be added -->
+				<include name="org/gk/sbml/**" />
+				<include name="org/gk/convert/common/**.class" />
+				<include name="org/gk/layout/**.class" />
+				<include name="org/gk/sbgn/**.class" />
+			</fileset>
+		</jar>
+		<exec executable="${targetDir}/installJar.sh">
+			<!-- file name -->
+			<arg value="${projectJar}" />
+			<!-- groupId -->
+			<arg value="org.reactome" />
+			<!-- artifactId -->
+			<arg value="pathway-exchange" />
+			<!-- version -->
+			<arg value="${projectVersion}" />
+		</exec>
+	</target>
 </project>

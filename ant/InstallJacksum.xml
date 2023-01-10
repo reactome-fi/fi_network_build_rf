@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!-- Install the checksum jar into the local maven repo  -->
+<project name="install_checksum" basedir=".." default="install">
+	<property name="targetDir" value="install_jar" />
+	<property name="projectVersion" value="1.0.0" />
+	<property name="projectJar"
+		value="${targetDir}/jacksum.jar" />
+
+	<target name="install">
+		<exec executable="${targetDir}/installJar.sh">
+			<!-- file name -->
+			<arg value="${projectJar}" />
+			<!-- groupId -->
+			<arg value="jonelo" />
+			<!-- artifactId -->
+			<arg value="jacksum" />
+			<!-- version -->
+			<arg value="${projectVersion}" />
+		</exec>
+	</target>
+</project>
