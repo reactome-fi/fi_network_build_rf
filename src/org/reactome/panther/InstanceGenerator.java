@@ -269,6 +269,10 @@ public class InstanceGenerator {
         else if (clsType.equals(PantherConstants.SIMPLE_MOLECULE_TYPE_NAME)) {
             rtn = createInstance(ReactomeJavaConstants.SimpleEntity);
         }
+        else if (clsType.equals(PantherConstants.DRUG_TYPE_NAME)) {
+            // For simplicity, map all drugs to ChemicalDrugs here
+            rtn = createInstance(ReactomeJavaConstants.ChemicalDrug);
+        }
         else if (clsType.equals(PantherConstants.UNKNOWN_TYPE_NAME)) {
             rtn = createInstance(ReactomeJavaConstants.OtherEntity);
         }
@@ -322,6 +326,8 @@ public class InstanceGenerator {
                 id = referenceLine.substring(PantherConstants.MEDLINE_LABEL.length() + 1).trim();
             else
                 id = referenceLine.substring(PantherConstants.PMID_LABEL.length() + 1).trim();
+            if (id.endsWith(","))
+                id = id.substring(0, id.length() - 1); // Remove ","
             lrInstance = searchInstance(ReactomeJavaConstants.LiteratureReference,
                                         ReactomeJavaConstants.pubMedIdentifier,
                                         new Integer(id));

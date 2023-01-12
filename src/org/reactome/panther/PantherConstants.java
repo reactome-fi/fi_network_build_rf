@@ -29,6 +29,7 @@ public class PantherConstants {
     public static final String SYNONYM_LABEL = "Synonym";
     public static final String LONG_NAME_LABEL = "Long Name";
     public static final String ACCESSION_LABEL = "Accession";
+    public static final String HETERODIMER_MEMBER_INFO_LABEL = "Heterodimer Member Info";
     public static final String POSITION_TO_COMPARTMENT_ELM_NAME = "positionToCompartment";
     public static final String SPECIES_IDENTITY_ELM_NAME = "speciesIdentity";
     public static final String CLASS_ELM_NAME = "class";
@@ -88,6 +89,7 @@ public class PantherConstants {
     public static final Namespace HTML_NS = Namespace.getNamespace("http://www.w3.org/1999/xhtml");
     public static final String WEB_SITE_LABEL = "Website";
     public static final String MEDLINE_LABEL = "Medline";
+    public static final String OMIM = "OMIM";
     public static final String PMID_LABEL = "PMID";
     public static final String FREE_TEXT_LABEL = "free text";
     public static final String EMPTY_PATHWAY_NOTE_MARK = "No pathway definition";
@@ -114,6 +116,7 @@ public class PantherConstants {
     public static final String UNKNOWN_TYPE_NAME = "UNKNOWN";
     public static final String DEGRADED_TYPE_NAME = "DEGRADED";
     public static final String GENERIC_TYPE_NAME = "GENERIC";
+    public static final String DRUG_TYPE_NAME = "DRUG";
     // Customized, not used in CellDesigner
     public static final String COMPLEX_TYPE_NAME = "COMPLEX";
     // values of positionToCompartment

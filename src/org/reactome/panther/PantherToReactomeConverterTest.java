@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -116,10 +119,19 @@ public class PantherToReactomeConverterTest {
         System.out.println(dirName);
         File[] sbmlFiles = new File(dirName).listFiles();
         System.out.println("Total files: " + sbmlFiles.length);
+        // The following list of pathways were added or updated after version 3.0.1, which break the code.
+        // Just skip them.
+        Set<String> skipSet = Stream.of(
+                "CCKR_signaling_map.xml",
+                "Gonadotropin_releasing_hormone_receptor_pathway.xml",
+                "Transcription_regulation_by_bZIP.xml" // In 3.0.1 with updates breaking the code, mainly related to complexes
+        ).collect(Collectors.toSet());
         List<String> fileNames = new ArrayList<String>();
         // Load all model files
         for (File file : sbmlFiles) {
             String fileName = file.getName();
+            // Get quite some problem with this pathway. Just skip it
+            if (skipSet.contains(fileName)) continue;
             if (fileName.endsWith(".xml"))
                 fileNames.add(file.getAbsolutePath());
         }
@@ -129,8 +141,10 @@ public class PantherToReactomeConverterTest {
         // Add these statements so that this pathway can be handled first.
         // Otherwise, some instances in this pathway may be messed up with others.
         String tmp = FIConfiguration.getConfiguration().get("PANTHER_FILES_DIR") + "Inflammation_mediated_by_chemokine_and_cytokine_signaling_pathway.xml";
-        fileNames.remove(tmp);
-        fileNames.add(0, tmp);
+        if (fileNames.contains(tmp)) {
+            fileNames.remove(tmp);
+            fileNames.add(0, tmp);
+        }
         ConverterHandler handler = ConverterHandler.getInstance();
         for (String fileName : fileNames) {
             logger.info("Converting " + fileName + "...");
@@ -142,8 +156,11 @@ public class PantherToReactomeConverterTest {
         }
         // Do post-processing.
         PantherPostProcessor postProcessor = new PantherPostProcessor();
+        logger.info("Staring postProcess...");
         postProcessor.postProcess(dbAdaptor, fileAdaptor);
+        logger.info("Done postProcess. Start otherprocesses...");
         postProcessor.otherProcesses(dbAdaptor, fileAdaptor);
+        logger.info("All done. Saving the converted project...");
         fileAdaptor.save(FIConfiguration.getConfiguration().get("PANTHER_CONVERTED_FILE"));
     }
     

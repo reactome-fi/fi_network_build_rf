@@ -1255,8 +1255,7 @@ public class PantherToReactomeConverterV25 implements Converter {
 			}
 		}
 		// If a complex component is not defined as a species, its Panther ID
-		// should
-		// be extracted from Heterodimer Member Info in note element
+		// should be extracted from Heterodimer Member Info in note element
 		Element noteElm = complexElm.getChild(PantherConstants.NOTES_ELM_NAME, complexElm.getNamespace());
 		String[] text = getTextFromNoteElm(noteElm);
 		// Check for Heterodimer Member Info
@@ -1268,7 +1267,12 @@ public class PantherToReactomeConverterV25 implements Converter {
 			System.out.println("Complex has no note: " + complex);
 			return;
 		}
-		String header = "Heterodimer Member Info";
+		// Fix for version later than 3.0.1
+		String header = PantherConstants.HETERODIMER_MEMBER_INFO_LABEL;
+		if (text.length == 1) {
+		    text = insertNewLineSplit(text[0], 
+		                              header);
+		}
 		List components = complex.getAttributeValuesList(ReactomeJavaConstants.hasComponent);
 		for (String line : text) {
 			if (line.startsWith(header)) {
@@ -1546,15 +1550,16 @@ public class PantherToReactomeConverterV25 implements Converter {
 	 */
 	private void cleanupEntityNames(GKInstance instance) throws Exception {
 		List<String> names = instance.getAttributeValuesList(ReactomeJavaConstants.name);
-		String name = names.size() > 0 ? names.get(0) : "";
-		while (names.size() > 1 && name.length() < 5 && name.startsWith("s")) {
-			try {
-				Integer.parseInt(name.substring(1));
-				names.remove(0);
-				name = names.get(0);
-			} catch (NumberFormatException ex) {
-			}
+		// Moved these names down, which most likely are from species ids
+		List<String> toBeDown = new ArrayList<>();
+		for (String name : names) {
+		    if (name.matches("s(\\d)*"))
+		        toBeDown.add(name);
 		}
+		if (names.size() == toBeDown.size())
+		    return; // Nothing to do
+		names.removeAll(toBeDown);
+		names.addAll(toBeDown);
 	}
 
 	private List<GKInstance> getModifications(Element modificationElm, Protein protein) throws Exception {
@@ -1577,6 +1582,16 @@ public class PantherToReactomeConverterV25 implements Converter {
 		String[] lines = getTextFromNoteElm(noteElm);
 		if (lines == null)
 			return;
+		// This workaround is used to fix the annoying issues with SBML files after release 3.0.1:
+		// All text is put into one single line
+		if (lines.length == 1) {
+		    // Do another passing
+		    lines = insertNewLineSplit(lines[0], 
+		                          PantherConstants.LONG_NAME_LABEL, 
+		                          PantherConstants.SYNONYM_LABEL,
+		                          PantherConstants.ACCESSION_LABEL,
+		                          PantherConstants.HETERODIMER_MEMBER_INFO_LABEL);
+		}
 		nameHandler.getNamesFromNotes(lines, entity);
 		for (String line : lines) {
 			line = line.trim();
@@ -1588,6 +1603,13 @@ public class PantherToReactomeConverterV25 implements Converter {
 				entity.addAttributeValue(ReactomeJavaConstants.crossReference, dbInstance);
 			}
 		}
+	}
+	
+	private String[] insertNewLineSplit(String line, String... labels) {
+	    for (String label : labels) {
+	        line = line.replaceAll(label, "\n" + label);
+	    }
+	    return line.split("\n");
 	}
 
 	private void processCompartmentsElement(Element compartmentsElm) throws Exception {
@@ -1670,8 +1692,16 @@ public class PantherToReactomeConverterV25 implements Converter {
 		// Analyze notes for the pathway
 		Element noteElm = eventElm.getChild(PantherConstants.NOTES_ELM_NAME, PantherConstants.SBML_NS);
 		String[] lines = getTextFromNoteElm(noteElm);
-		if (lines == null)
+		if (lines == null || lines.length == 0)
 			return;
+		if (lines.length == 1) {
+		    lines = insertNewLineSplit(lines[0],
+		                               PantherConstants.WEB_SITE_LABEL,
+		                               PantherConstants.FREE_TEXT_LABEL,
+		                               PantherConstants.MEDLINE_LABEL,
+		                               PantherConstants.PMID_LABEL,
+		                               PantherConstants.OMIM);
+		}
 		StringBuilder summationText = new StringBuilder();
 		// Get the text summation
 		for (String line : lines) {

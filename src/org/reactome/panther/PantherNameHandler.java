@@ -141,10 +141,12 @@ public class PantherNameHandler {
         List<String> names = entity.getAttributeValuesList(ReactomeJavaConstants.name);
         for (String line : lines) {
             line = line.trim();
-            if (line.length() == 0)
+            if (line.length() == 0 || line.toLowerCase().contains("not specified")) // Just ignore them
                 continue;
             if (line.startsWith(PantherConstants.LONG_NAME_LABEL)) {
                 String longName = line.substring(PantherConstants.LONG_NAME_LABEL.length() + 1).trim();
+                if (longName.length() == 0)
+                    continue;
                 // Seems a bug in CellDesigner. See Long Name for calcium in Angiogenesis.xml.
                 if (longName.startsWith(PantherConstants.LONG_NAME_LABEL)) {
                     longName = longName.substring(PantherConstants.LONG_NAME_LABEL.length() + 1).trim();
@@ -167,6 +169,8 @@ public class PantherNameHandler {
             }
             else if (line.startsWith(PantherConstants.SYNONYM_LABEL)) {
                 String synonym = line.substring(PantherConstants.SYNONYM_LABEL.length() + 1).trim();
+                if (synonym.length() == 0)
+                    continue;
                 if (!synonym.equals(PantherConstants.EMPTY_SYNONYM_MARK)) {
                     // Delimited by ","
                     String[] nameArray = synonym.split(",");
