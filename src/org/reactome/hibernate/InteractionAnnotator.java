@@ -172,8 +172,8 @@ public class InteractionAnnotator extends HibernateFIReader {
         // Find the highest score in this loop.
         for (Interaction i : interactions) {
             if (i.getEvidence() != null) {
-                if (i.getEvidence().getProbability() > score)
-                    score = i.getEvidence().getProbability();
+                if (i.getEvidence().getScore() > score)
+                    score = i.getEvidence().getScore();
             }
             else { // Extracted FI
                 score = 1.0d;

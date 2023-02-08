@@ -179,62 +179,6 @@ public class HibernateFIReader extends HibernateFIPersistence {
         session.close();
     }
     
-    /**
-     * This method is used to check ZNF genes in the FI files.
-     * @throws IOException
-     */
-    @Test
-    public void checkZNFInFIs() throws Exception {
-        FileUtility fu = new FileUtility();
-        Set<String> fis = fu.loadInteractions(FIConfiguration.getConfiguration().get("GENE_FI_FILE_NAME"));
-        Set<String> genes = InteractionUtilities.grepIDsFromInteractions(fis);
-        Set<String> znfs = new HashSet<String>();
-        for (String gene : genes) {
-            if (gene.startsWith("ZNF"))
-                znfs.add(gene);
-        }
-        System.out.println("Total Genes: " + genes.size());
-        System.out.println("Total ZNFs: " + znfs.size() + " (" + (double)znfs.size() / genes.size() + ")");
-        Set<String> touchedZNFFIs = new HashSet<String>();
-        Set<String> allZNFFIs = new HashSet<String>();
-        for (String fi : fis) {
-            int index = fi.indexOf("\t");
-            String gene1 = fi.substring(0, index);
-            String gene2 = fi.substring(index + 1);
-            if (gene1.startsWith("ZNF") || gene2.startsWith("ZNF"))
-                touchedZNFFIs.add(fi);
-            if (gene1.startsWith("ZNF") && gene2.startsWith("ZNF"))
-                allZNFFIs.add(fi);
-        }
-        System.out.println("Total FIs: " + fis.size());
-        System.out.println("Total FIs having at least one ZNF: " + touchedZNFFIs.size() + " (" + (double)touchedZNFFIs.size() / fis.size() + ")");
-        System.out.println("Total FIs having both ZNFs: " + allZNFFIs.size() + " (" + (double)allZNFFIs.size() / fis.size() + ")");
-        // Check the data sources
-        SessionFactory sf = initSession();
-        Session session = sf.openSession();
-        int predicted = 0;
-        int annotated = 0;
-        for (String fi : allZNFFIs) {
-            int index = fi.indexOf("\t");
-            String gene1 = fi.substring(0, index);
-            String gene2 = fi.substring(index + 1);
-            List<Interaction> interactions = queryFIsBasedOnGeneNames(gene1,
-                                                                      gene2,
-                                                                      session);
-            for (Interaction i : interactions) {
-                if (i.getEvidence() == null) {
-                    annotated ++;
-                    break;
-                }
-                else if (i.getEvidence().getDmePPI())
-                    predicted ++;
-            }
-        }
-        session.close();
-        System.out.println("Annotated in all ZNF FIs: " + annotated);
-        System.out.println("Predicted via Fly PPI: " + predicted);
-    }
-    
     public void calculateRankFrequences() throws IOException {
         String fileName = "results/ProteinInteractionCount0_6.txt";
         FileUtility fu = new FileUtility();
@@ -333,109 +277,6 @@ public class HibernateFIReader extends HibernateFIPersistence {
         else if (compare > 0)
             fi = name2 + "\t" + name1;
         return fi;
-    }
-    
-    @Test
-    public void checkEvidenceForPredictedFIs() throws Exception {
-        initSession();
-        Session session = sessionFactory.openSession();
-        Query query = session.createQuery("FROM Interaction as i WHERE i.evidence.probability >= ?");
-        query.setDouble(0, CUT_OFF_VALUE);
-        long time1 = System.currentTimeMillis();
-        List list = query.list();
-        System.out.println("Total interactions from prediction: " + list.size());
-        Interaction interaction = null;
-        // Start counting and output
-        int count = 0;
-        Set<Interaction> ppiInts = new HashSet<Interaction>();
-        for (Iterator it = list.iterator(); it.hasNext();) {
-            interaction = (Interaction) it.next();
-            int ppi = 0;
-            Evidence evidence = interaction.getEvidence();
-            if (evidence.getHumanInteraction() || evidence.getCelPPI() || evidence.getDmePPI() || evidence.getScePPI() || evidence.getGenewaysPPI()) {
-                ppi ++;
-                ppiInts.add(interaction);
-            }
-//            if (evidence.getCelPPI())
-//                ppi ++;
-//            if (evidence.getDmePPI())
-//                ppi ++;
-//            if (evidence.getScePPI())
-//                ppi ++;
-//            if (evidence.getGenewaysPPI())
-//                ppi ++;
-//            if (evidence.getPfamDomainInt())
-//                ppi ++;
-//            if (evidence.getGoBPSharing())
-//                ppi ++;
-//            if (evidence.getCarlosGeneExp() || evidence.getPavlidisGeneExp())
-//                ppi ++;
-////            if (evidence.getPavlidisGeneExp() || evidence.getCarlosGeneExp() || evidence.getGoBPSharing())
-////                ppi ++;
-//            if (ppi > 1)
-//                count ++;
-        }
-        System.out.println("Interactions having at least 2 PPIs: " + count);
-        System.out.println("Interactions having at least one PPI: " + ppiInts.size());
-        Set<Interaction> bpSharingInts = new HashSet<Interaction>();
-        Set<Interaction> expInts = new HashSet<Interaction>();
-        Set<Interaction> domainInts = new HashSet<Interaction>();
-        for (Interaction in : ppiInts) {
-            Evidence evidence = in.getEvidence();
-            if (evidence.getGoBPSharing())
-                bpSharingInts.add(in);
-            if (evidence.getCarlosGeneExp() || evidence.getPavlidisGeneExp())
-                expInts.add(in);
-            if (evidence.getPfamDomainInt())
-                domainInts.add(in);
-        }
-        System.out.println("\nPPI Interactions having BP sharing: " + bpSharingInts.size());
-        System.out.println("PPI interactions having Gene exp: " + expInts.size());
-        System.out.println("PPI interactions having domain int: " + domainInts.size());
-        // Check sharing
-        Set<Interaction> shared = new HashSet<Interaction>(bpSharingInts);
-        shared.retainAll(expInts);
-        System.out.println("Shared between bp and exp: " + shared.size());
-        shared = new HashSet<Interaction>(bpSharingInts);
-        shared.retainAll(domainInts);
-        System.out.println("Shared between bp and domain: " + shared.size());
-        shared = new HashSet<Interaction>(expInts);
-        shared.retainAll(domainInts);
-        System.out.println("Shared between exp and domain: " + shared.size());
-        shared.retainAll(bpSharingInts);
-        System.out.println("Shared among bp, exp and domain: " + shared.size());
-        // For other non PPI FIs
-        Set<Interaction> nonPPIInts = new HashSet<Interaction>(list);
-        nonPPIInts.removeAll(ppiInts);
-        bpSharingInts.clear();
-        expInts.clear();
-        domainInts.clear();
-        for (Interaction in : nonPPIInts) {
-            Evidence evidence = in.getEvidence();
-            if (evidence.getGoBPSharing())
-                bpSharingInts.add(in);
-            if (evidence.getCarlosGeneExp() || evidence.getPavlidisGeneExp())
-                expInts.add(in);
-            if (evidence.getPfamDomainInt())
-                domainInts.add(in);
-        }
-        System.out.println("\nTotal non-PPI predicted FIs: " + nonPPIInts.size());
-        System.out.println("Non-PPI Interactions having BP sharing: " + bpSharingInts.size());
-        System.out.println("Non-PPI interactions having Gene exp: " + expInts.size());
-        System.out.println("Non-PPI interactions having domain int: " + domainInts.size());
-        // Check sharing
-        shared = new HashSet<Interaction>(bpSharingInts);
-        shared.retainAll(expInts);
-        System.out.println("Shared between bp and exp: " + shared.size());
-        shared = new HashSet<Interaction>(bpSharingInts);
-        shared.retainAll(domainInts);
-        System.out.println("Shared between bp and domain: " + shared.size());
-        shared = new HashSet<Interaction>(expInts);
-        shared.retainAll(domainInts);
-        System.out.println("Shared between exp and domain: " + shared.size());
-        shared.retainAll(bpSharingInts);
-        System.out.println("Shared among bp, exp and domain: " + shared.size());
-        session.close();
     }
     
     /**
@@ -670,83 +511,6 @@ public class HibernateFIReader extends HibernateFIPersistence {
         }
         return rtn;
     }
-    
-    /**
-     * Generate an FI file using Hibernate API.
-     * @throws Exception
-     */
-    public void generateFIFileInHibernate() throws Exception {
-        initSession();
-        Session session = sessionFactory.openSession();
-        Query query = session.createQuery("FROM Interaction as i WHERE i.evidence.probability >= ?");
-        query.setDouble(0, CUT_OFF_VALUE);
-        long time1 = System.currentTimeMillis();
-        List list = query.list();
-        Interaction interaction = null;
-        //String fileName = FIConfiguration.getConfiguration().get("RESULT_DIR + "FI73_041408.txt";
-        // Used to hold FIs to count how many proteins and interactions
-        Set<String> predicatedFIs = new HashSet<String>();
-        Set<String> pathwayFIs = new HashSet<String>();
-        Set<String> allFIs = new HashSet<String>();
-        // Start counting and output
-        for (Iterator it = list.iterator(); it.hasNext();) {
-            interaction = (Interaction) it.next();
-            if (interaction.getEvidence() == null ||
-                interaction.getEvidence().getProbability() >= 0.73d) {
-                Protein protein1 = interaction.getFirstProtein();
-                Protein protein2 = interaction.getSecondProtein();
-                String fi = protein1.getPrimaryAccession() + " " + 
-                            protein2.getPrimaryAccession();
-                predicatedFIs.add(fi);
-                allFIs.add(fi);
-            }
-        }
-        query = session.createQuery("FROM Interaction as i WHERE i.evidence is null");
-        list = query.list();
-        System.out.println("Total interactions from pathways: " + list.size());
-        for (Iterator it = list.iterator(); it.hasNext();) {
-            interaction = (Interaction) it.next();
-            Protein protein1 = interaction.getFirstProtein();
-            Protein protein2 = interaction.getSecondProtein();
-            String fi = protein1.getPrimaryAccession() + " " +
-                        protein2.getPrimaryAccession();
-            pathwayFIs.add(fi);
-            allFIs.add(fi);
-        }
-        long time2 = System.currentTimeMillis();
-        System.out.println("Time for getting interactions: " + (time2 - time1));
-        session.close();
-        // Calculate numbers
-        // FIs
-        System.out.println("Total predicated FIs: " + predicatedFIs.size());
-        System.out.println("Total pathway FIs:" + pathwayFIs.size());
-        System.out.println("Total FIs: " + allFIs.size());
-        // Proteins in FIs
-        Set<String> predicatedProteins = InteractionUtilities.grepIDsFromInteractions(predicatedFIs);
-        Set<String> pathwayProteins = InteractionUtilities.grepIDsFromInteractions(pathwayFIs);
-        Set<String> allProteins = InteractionUtilities.grepIDsFromInteractions(allFIs);
-        System.out.println("Total predicated proteins: " + predicatedProteins.size());
-        System.out.println("Total pathway proteins: " + pathwayProteins.size());
-        System.out.println("Total proteins: " + allProteins.size());
-        // Check against SwissProt
-        ProteinAndInteractionCount count = new ProteinAndInteractionCount();
-        System.out.println("Predicated SwissProt:");
-        count.countVsSwissProt(predicatedProteins);
-        System.out.println("Pathway SwissProt:");
-        count.countVsSwissProt(pathwayProteins);
-        System.out.println("All SwissProt:");
-        count.countVsSwissProt(allProteins);
-        // Output FI files
-        FIFileAnalyzer fiFileAnalyzer = new FIFileAnalyzer();
-        // All files
-        fiFileAnalyzer.saveFIInOrder(allFIs, 
-                                     FIConfiguration.getConfiguration().get("RESULT_DIR") + "FI73_042108.txt");
-        fiFileAnalyzer.saveFIInOrder(predicatedFIs,
-                                     FIConfiguration.getConfiguration().get("RESULT_DIR") + "FI73_Predicated_042108.txt");
-        fiFileAnalyzer.saveFIInOrder(pathwayFIs, 
-                                     FIConfiguration.getConfiguration().get("RESULT_DIR") + "FI73_Pathway_042108.txt");
-    }
-    
     
     /**
      * This method is used to generate protein names to UniProt accession numbers.
@@ -1090,31 +854,8 @@ public class HibernateFIReader extends HibernateFIPersistence {
         Set<String> dbAccs = new HashSet<String>();
         for (Iterator it = list.iterator(); it.hasNext();) {
             Evidence evidence = (Evidence) it.next();
-            System.out.println(evidence.getDbId() + ", humanInteraction: " + evidence.getHumanInteraction() + ", " + evidence.getProbability());
+            System.out.println(evidence.getDbId() + ", humanInteraction: " + evidence.getHumanPPI() + ", " + evidence.getScore());
         }
-        session.close();
-    }
-    
-    @Test
-    public void checkInteraction() throws Exception {
-        initSession();
-        Session session = sessionFactory.openSession();
-        Interaction interaction = (Interaction) session.load(Interaction.class, new Long(169934));
-        Protein protein1 = interaction.getFirstProtein();
-        Protein protein2 = interaction.getSecondProtein();
-        System.out.println("Interaction: " + protein1.getShortName() + " " + protein2.getShortName());
-        Evidence evidence = interaction.getEvidence();
-        System.out.println("Evidence: ");
-        System.out.println("HumanInt: " + evidence.getHumanInteraction());
-        System.out.println("SceInt: " + evidence.getScePPI());
-        System.out.println("DmeInt: " + evidence.getDmePPI());
-        System.out.println("CelInt: " + evidence.getCelPPI());
-        System.out.println("GenewaysInt: " + evidence.getGenewaysPPI());
-        System.out.println("CarlosGeneExp: " + evidence.getCarlosGeneExp());
-        System.out.println("PavlidisGeneExp: " + evidence.getPavlidisGeneExp());
-        System.out.println("GO_BP_Sharing: " + evidence.getGoBPSharing());
-        System.out.println("PFam Domain Int: " + evidence.getPfamDomainInt());
-        System.out.println("Score: " + evidence.getProbability());
         session.close();
     }
     

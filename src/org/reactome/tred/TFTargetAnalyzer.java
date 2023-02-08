@@ -166,8 +166,8 @@ public class TFTargetAnalyzer {
                 proteins.add(i.getFirstProtein().getShortName());
                 proteins.add(i.getSecondProtein().getShortName());
             }
-            else if (i.getEvidence().getHumanInteraction() != null &&
-                     i.getEvidence().getHumanInteraction()) {
+            else if (i.getEvidence().getHumanPPI() != null &&
+                     i.getEvidence().getHumanPPI()) {
                 proteins.add(i.getFirstProtein().getShortName());
                 proteins.add(i.getSecondProtein().getShortName());
             }

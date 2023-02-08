@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
 import org.gk.model.GKInstance;
@@ -1649,7 +1650,7 @@ public class ReactomeAnalyzer {
         System.out.println("Total Pathways: " + list.size());
     }
     
-    private Map<String, String> getUniProtToGeneMap(MySQLAdaptor dba) throws Exception {
+    public Map<String, String> getUniProtToGeneMap(MySQLAdaptor dba) throws Exception {
         Collection<GKInstance> refSeqs = dba.fetchInstanceByAttribute(ReactomeJavaConstants.ReferenceGeneProduct,
                                                                       ReactomeJavaConstants.species,
                                                                       "=",
@@ -1665,5 +1666,69 @@ public class ReactomeAnalyzer {
             idToGene.put(id, gene);
         }
         return idToGene;
+    }
+    
+    /**
+     * This method is used to create a map from synonyms to gene symbol. Basically it checks attributes
+     * in the geneName slot of ReferenceGeneProduct. The original gene names are quite messy. A primary gene
+     * name may be used as synonym in other primary gene name. For example, PCM1 is a synonym of MBD1. Therefore,
+     * the mapping is controlled to avoid a primary gene name is mapped to another primary gene name. See the code 
+     * note below.
+     * @param dba
+     * @return
+     * @throws Exception
+     */
+    public Map<String, String> getSynonymToGeneName(MySQLAdaptor dba) throws Exception {
+        Collection<GKInstance> refSeqs = dba.fetchInstanceByAttribute(ReactomeJavaConstants.ReferenceGeneProduct,
+                                                                      ReactomeJavaConstants.species,
+                                                                      "=",
+                                                                      48887L);
+        dba.loadInstanceAttributeValues(refSeqs, new String[]{
+                ReactomeJavaConstants.geneName
+        });
+        Map<String, String> synonymToGene = new HashMap<String, String>();
+        // Get the primary gene names first
+        Set<String> primaryGeneNames = new HashSet<>();
+        for (GKInstance inst : refSeqs) {
+            if (inst.getSchemClass().isa(ReactomeJavaConstants.ReferenceIsoform))
+                continue; // Just check ReferenceGeneProduct only
+            List<String> geneNames = inst.getAttributeValuesList(ReactomeJavaConstants.geneName);
+            if (geneNames == null || geneNames.size() == 0)
+                continue;
+            String gene = geneNames.get(0); // The first should be the current version of symbol
+            primaryGeneNames.add(gene);
+        }
+        // To make it consistent, we will sort instances
+        List<GKInstance> refSeqsList = refSeqs.stream()
+                .filter(i -> !i.getSchemClass().isa(ReactomeJavaConstants.ReferenceIsoform))
+                .sorted((i1, i2) -> i1.getDBID().compareTo(i2.getDBID()))
+                .collect(Collectors.toList());
+        // Now do the synonym mapping
+        for (GKInstance inst : refSeqsList) {
+            if (inst.getSchemClass().isa(ReactomeJavaConstants.ReferenceIsoform))
+                continue; // Just check ReferenceGeneProduct only
+            List<String> geneNames = inst.getAttributeValuesList(ReactomeJavaConstants.geneName);
+            if (geneNames == null || geneNames.size() == 0)
+                continue;
+            String gene = geneNames.get(0); // The first should be the current version of symbol
+            for (String name : geneNames) {
+                // Don't map the primary gene name for the time being so that if it is used as a synonym
+                // it will not be pushed into the map
+                if (primaryGeneNames.contains(name))
+                    continue;
+                // Because one gene may be mapped to more than on UniProt, 
+                // a synonym or a gene may be in the map already. Since we have sorted these instances,
+                // therefore, the first primary gene will be used in the ordered list. This may not be correct
+                // for some genes. But it should make a consistent result.
+                if (synonymToGene.containsKey(name)) {
+//                    logger.warn(name + " has been mapped to a primary gene name earlier.");
+                    continue;
+                }
+                synonymToGene.put(name, gene);
+            }
+        }
+        // Now push all primary gene names by themselves
+        primaryGeneNames.forEach(name -> synonymToGene.put(name, name));
+        return synonymToGene;
     }
 }

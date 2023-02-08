@@ -334,6 +334,12 @@ public class UniProtAnalyzer {
         long time2 = System.currentTimeMillis();
         System.out.println("Total loading time: " + (time2 - time1));
         System.out.println("Size of map: " + geneNameToUniAccessMap.size());
+        // Check how many cases for one gene to multiple uniprot ids
+        geneNameToUniAccessMap.forEach((gene, set) -> {
+           if (set.size() == 1)
+               return;
+           System.out.println(gene + ": " + set);
+        });
     }
     
     /**

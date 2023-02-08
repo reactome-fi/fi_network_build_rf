@@ -1587,9 +1587,10 @@ public class PantherToReactomeConverterV25 implements Converter {
 		if (lines.length == 1) {
 		    // Do another passing
 		    lines = insertNewLineSplit(lines[0], 
-		                          PantherConstants.LONG_NAME_LABEL, 
-		                          PantherConstants.SYNONYM_LABEL,
+		                          PantherConstants.LONG_NAME_LABEL + ":", 
+		                          PantherConstants.SYNONYM_LABEL + ":",
 		                          PantherConstants.ACCESSION_LABEL,
+		                          PantherConstants.PANTHER_LINK_LABEL,
 		                          PantherConstants.HETERODIMER_MEMBER_INFO_LABEL);
 		}
 		nameHandler.getNamesFromNotes(lines, entity);

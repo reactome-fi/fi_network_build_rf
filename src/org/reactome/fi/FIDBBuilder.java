@@ -52,7 +52,7 @@ import weka.core.Instances;
  */
 public class FIDBBuilder extends HibernateFIPersistence {
     private static final Logger logger = Logger.getLogger(FIDBBuilder.class);
-    private final double CUT_OFF_VALUE = new Double(FIConfiguration.getConfiguration().get("CUT_OFF_VALUE"));
+    private final double CUT_OFF_VALUE = Double.parseDouble(FIConfiguration.getConfiguration().get("CUT_OFF_VALUE"));
     
     public FIDBBuilder() {   
     }
@@ -69,7 +69,7 @@ public class FIDBBuilder extends HibernateFIPersistence {
         Session session = sessionFactory.openSession();
         Query query = session.createQuery("FROM " + Interaction.class.getName());
         List<?> list = query.list();
-        System.out.println("Interaction should be empty: " + list.size());
+        logger.info("Interaction should be empty: " + list.size());
         if (list.size() > 0)
             throw new IllegalStateException("FI Database is not empty!");
         session.close();
@@ -77,7 +77,6 @@ public class FIDBBuilder extends HibernateFIPersistence {
     
     @Test
     public void testDump() throws Exception {
-        long time1 = System.currentTimeMillis();
         ReactomeFuncInteractionExtractor extractor = new ReactomeFuncInteractionExtractor();
         List<ReactomeAnalyzer> analyzerList = ReactomeAnalyzer.getPathwayDBAnalyzers();
         for (ReactomeAnalyzer a : analyzerList) {
@@ -176,18 +175,18 @@ public class FIDBBuilder extends HibernateFIPersistence {
             start += list.size();
             query.setFirstResult(start);
             list = query.list();
-            System.out.println("Current interactions: " + start);
+            logger.info("Current interactions: " + start);
             //break;
         }
         long time2 = System.currentTimeMillis();
-        System.out.println("Time for getting interactions: " + (time2 - time1));
-        System.out.println("Instances needing evidence: " + intNeedEvidences.size());
+        logger.info("Time for getting interactions: " + (time2 - time1));
+        logger.info("Instances needing evidence: " + intNeedEvidences.size());
         // Need to make change here just before session.clear. Otherwise,
         // changed states cannot save fast enough.
         addEvidences(intNeedEvidences);
         //addEvidenceForManuel(intNeedEvidences);
         long time3 = System.currentTimeMillis();
-        System.out.println("Time for adding evidences: " + (time3 - time2));
+        logger.info("Time for adding evidences: " + (time3 - time2));
         int c = 0;
         for (Interaction tmp : intNeedEvidences) {
             session.persist(tmp.getEvidence());
@@ -200,71 +199,13 @@ public class FIDBBuilder extends HibernateFIPersistence {
         session.flush();
         session.clear();
         long time4 = System.currentTimeMillis();
-        System.out.println("Time for saving evidences: " + (time4 - time3));
+        logger.info("Time for saving evidences: " + (time4 - time3));
         // Update Interactions
         updateInteractionsForEvidences(intNeedEvidences, session);
         long time5 = System.currentTimeMillis();
-        System.out.println("Time for updating interactions: " + (time5 - time4));
+        logger.info("Time for updating interactions: " + (time5 - time4));
         tx.commit();
         session.close();
-    }
-    
-    /**
-     * A helper method for the data set from Manuel. 
-     * @param interactions
-     */
-    private void addEvidenceForManuel(List<Interaction> interactions) {
-        for (Interaction i : interactions) {
-            Evidence evidence = new Evidence();
-            evidence.setProbability(0.99);
-            i.setEvidence(evidence);
-        }
-    }
-    
-    /**
-     * Use this method to update evidence's probability because of the model changes. 
-     * Other predictor values should NOT be changed.
-     * @throws Exception
-     */
-    public void updateEvidences() throws Exception {
-        initSession();
-        Session session = sessionFactory.openSession();
-        Transaction tx = session.beginTransaction();
-        Query query = session.createQuery("FROM " + Evidence.class.getName());
-        int start = 0;
-        int max = 5000;
-        // Use pagination query to minimize the memory usage.
-        query.setFirstResult(start);
-        query.setMaxResults(max);
-        long time1 = System.currentTimeMillis();
-        List list = query.list();
-        Evidence evidence = null;
-        int c = 0;
-        // Initialize functional interactions
-        FunctionalInteractionAnalyzer analyzer = new FunctionalInteractionAnalyzer();
-        analyzer.setUp();
-        Instances dataset = new WEKAResultAnalyzer().createDataSet();
-        Value value = new Value();
-        double[] props;
-        while (list.size() > 0) {
-            //intNeedEvidences.clear();
-            for (Iterator it = list.iterator(); it.hasNext();) {
-                evidence = (Evidence) it.next();
-                convertEvidenceToValue(evidence, value);
-                props = analyzer.calculateProbabilities(value, dataset);
-                evidence.setProbability(props[0]);
-                session.update(evidence);
-                c ++;
-            }
-            session.flush();
-            session.clear(); // To empty cache to keep the memory usage small.
-            start += list.size();
-            query.setFirstResult(start);
-            list = query.list();
-        }
-        tx.commit();
-        session.close();
-        System.out.println("Total Evidences: " + c);
     }
     
     private void updateInteractionsForEvidences(List<Interaction> interactions,
@@ -309,9 +250,14 @@ public class FIDBBuilder extends HibernateFIPersistence {
      */
     @Test
     public void dumpPredictedFIs() throws Exception {
-        FIFileAnalyzer fileAnalyzer = new FIFileAnalyzer();
-        Set<String> predictedPairs = fileAnalyzer.loadPredictedFIs();
-        System.out.println("Total predicted FIs: " + predictedPairs.size());
+        RFPredictionResultAnalyzer rfHelper = new RFPredictionResultAnalyzer();
+        // As of 2/6/2023, switch to use predicted FIs from the random forest model
+        Map<String, Evidence> predictedFI2Evidence = rfHelper.loadPredictedFIsWithEvidence();
+        logger.info("Total predicted FIs with evidence: " + predictedFI2Evidence.size());
+        // NB by G.W (2/7/2023): One gene may be mapped to more than one UniProt accessions. However, the utilities
+        // of ReactomeFIViz and the FI network are for genes. Therefore, only one UniProt accession
+        // is used in this mapping.
+        Map<String, String> fisInGenes2UniProt = rfHelper.mapFIsInGenesToFIsInUniProt(predictedFI2Evidence.keySet());
         // Check if any proteins cannot be mapped
         initSession();
         Session session = sessionFactory.openSession();
@@ -321,19 +267,17 @@ public class FIDBBuilder extends HibernateFIPersistence {
         // Since all UniProt accession numbers should have been sequence normalized. We can use
         // accession numbers directly.
         Map<String, Protein> accToProteinInDb = loadProteinsInDB(session);
-        System.out.println("Total protein from db: " + accToProteinInDb.size());
+        logger.info("Total protein from db: " + accToProteinInDb.size());
         // Help to get Proteins if not in the database
         ReactomeFuncInteractionExtractor fiHelper = new ReactomeFuncInteractionExtractor();
         List<Interaction> predictedFIs = new ArrayList<Interaction>();
-        // For Evidence
-        FeatureHandlerForV3 featureHandler = new FeatureHandlerForV3();
-        Map<String, PositiveChecker> featureToChecker = featureHandler.loadFeatureToChecker();
-        NaiveBayesClassifier nbc = new NBCAnalyzer().loadSavedNBC();
         // Add these pairs to the database
-        for (String pair : predictedPairs) {
-            int index = pair.indexOf("\t");
-            String acc1 = pair.substring(0, index);
-            String acc2 = pair.substring(index + 1);
+        for (String pair : predictedFI2Evidence.keySet()) {
+            // Switch from genes to uniprots
+            String fiInUniProt = fisInGenes2UniProt.get(pair);
+            int index = fiInUniProt.indexOf("\t");
+            String acc1 = fiInUniProt.substring(0, index);
+            String acc2 = fiInUniProt.substring(index + 1);
             Protein protein1 = accToProteinInDb.get(acc1);
             if (protein1 == null)
                 protein1 = fiHelper.getProtein("UniProt:" + acc1); // All accessions are from UniProt
@@ -347,16 +291,10 @@ public class FIDBBuilder extends HibernateFIPersistence {
             Interaction interaction = new Interaction();
             interaction.setFirstProtein(protein1);
             interaction.setSecondProtein(protein2);
-            addEvidence(interaction,
-                        pair,
-                        featureToChecker,
-                        nbc);
-            if (interaction.getEvidence().getProbability() < CUT_OFF_VALUE)
-                throw new IllegalStateException("Score of pair, " + pair + ", is less than cutoff value, " +
-                                                CUT_OFF_VALUE);
+            interaction.setEvidence(predictedFI2Evidence.get(pair));
             predictedFIs.add(interaction);
         }
-        System.out.println("Total FIs will be added to the FI database: " + predictedFIs.size());
+        logger.info("Total FIs will be added to the FI database: " + predictedFIs.size());
         // After all these steps, we can save them to the database.
         // Three steps are used to persist these new Interaction
         // First for Proteins
@@ -373,13 +311,13 @@ public class FIDBBuilder extends HibernateFIPersistence {
                 totalProtein ++;
             }
         }
-        System.out.println("Save proteins: " + totalProtein);
+        logger.info("Save proteins: " + totalProtein);
         // Second for Evidence
         for (Interaction interaction : predictedFIs) {
             Evidence evidence = interaction.getEvidence();
             session.persist(evidence);
         }
-        System.out.println("Save evidences: " + predictedFIs.size());
+        logger.info("Save evidences: " + predictedFIs.size());
         // Third for Interaction
         // I want to have JDBC control to increase the performance
         for (Interaction interaction : predictedFIs) {
@@ -442,7 +380,7 @@ public class FIDBBuilder extends HibernateFIPersistence {
                              NaiveBayesClassifier nbc) throws Exception {
         double score = nbc.calculateScore(pair, featureToChecker);
         Evidence evidence = new Evidence();
-        evidence.setProbability(score);
+        evidence.setScore(score);
         // For other information
         for (String feature : featureToChecker.keySet()) {
             PositiveChecker checker = featureToChecker.get(feature);
@@ -458,76 +396,20 @@ public class FIDBBuilder extends HibernateFIPersistence {
                              Value value,
                              double[] probs) {
         Evidence evidence = new Evidence();
-        // Copy values from Value to evidence
-        evidence.setProbability(probs[0]);
-        evidence.setHumanInteraction(value.humanInteraction);
-        evidence.setOrthoInteraction(value.orthoInteraction);
-        evidence.setYeastInteraction(value.yeastInteraction);
-        if (value.geneExp == null)
-            evidence.setGeneExp(GeneExpressionType.UNCORRELATED);
-        else if (value.geneExp.equals("pos"))
-            evidence.setGeneExp(GeneExpressionType.POSITIVE);
-        else if (value.geneExp.equals("neg"))
-            evidence.setGeneExp(GeneExpressionType.NEGATIVE);
-        else
-            evidence.setGeneExp(GeneExpressionType.UNCORRELATED);
-        evidence.setGoBPSemanticSimilarity(value.goBPSemSimilarity);
+//        // Copy values from Value to evidence
+//        evidence.setProbability(probs[0]);
+//        evidence.setHumanInteraction(value.humanInteraction);
+//        evidence.setOrthoInteraction(value.orthoInteraction);
+//        evidence.setYeastInteraction(value.yeastInteraction);
+//        if (value.geneExp == null)
+//            evidence.setGeneExp(GeneExpressionType.UNCORRELATED);
+//        else if (value.geneExp.equals("pos"))
+//            evidence.setGeneExp(GeneExpressionType.POSITIVE);
+//        else if (value.geneExp.equals("neg"))
+//            evidence.setGeneExp(GeneExpressionType.NEGATIVE);
+//        else
+//            evidence.setGeneExp(GeneExpressionType.UNCORRELATED);
+//        evidence.setGoBPSemanticSimilarity(value.goBPSemSimilarity);
         interaction.setEvidence(evidence);
-    }
-    
-    private void convertEvidenceToValue(Evidence evidence,
-                                        Value value) {
-        value.humanInteraction = evidence.getHumanInteraction();
-        value.orthoInteraction = evidence.getOrthoInteraction();
-        value.yeastInteraction = evidence.getYeastInteraction();
-        if (evidence.getGeneExp() == GeneExpressionType.UNCORRELATED)
-            value.geneExp = null;
-        else if (evidence.getGeneExp() == GeneExpressionType.POSITIVE)
-            value.geneExp = "pos";
-        else if (evidence.getGeneExp() == GeneExpressionType.NEGATIVE)
-            value.geneExp = "neg";
-        value.goBPSemSimilarity = evidence.getGoBPSemanticSimilarity();
-    }
-    
-    /**
-     * During dumping, some FIs from Reactome have not been assigned types because a bug in class 
-     * ReactomeFuncInteractionExtractor: Reaction instead of ReactionlikeEvent is used. Also type 
-     * (TARGETED_INTERACTION) is not assigned to FIs extracted from TRED data set.
-     * @throws Exception
-     */
-    @Test
-    public void fixSourceTypes() throws Exception {
-        initSession();
-        Session session = sessionFactory.openSession();
-        Query query = session.createQuery("FROM " + ReactomeSource.class.getName() + " s WHERE s.sourceType IS NULL");
-        List list = query.list();
-        System.out.println("Total ReactomeSource having no types: " + list.size());
-        // Need mysql to query the types
-        MySQLAdaptor dba = new MySQLAdaptor("localhost",
-                                            "reactome_28_plus_i",
-                                            "root",
-                                            "macmysql01",
-                                            3306);
-        // Use Transaction
-        Transaction transaction = session.beginTransaction();
-        for (Iterator it = list.iterator(); it.hasNext();) {
-            ReactomeSource source = (ReactomeSource) it.next();
-            Long reactomeId = source.getReactomeId();
-            GKInstance instance = dba.fetchInstance(reactomeId);
-            if (instance.getSchemClass().isa(ReactomeJavaConstants.ReactionlikeEvent))
-                source.setSourceType(ReactomeSourceType.REACTION);
-            else if (instance.getSchemClass().isa(ReactomeJavaConstants.TargettedInteraction))
-                source.setSourceType(ReactomeSourceType.TARGETED_INTERACTION);
-            session.save(source);
-        }
-        try {
-            transaction.commit();
-        }
-        catch(Exception e) {
-            transaction.rollback();
-            session.close();
-            throw e;
-        }
-        session.close();
     }
 }

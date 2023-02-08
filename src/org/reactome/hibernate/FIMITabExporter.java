@@ -109,7 +109,7 @@ public class FIMITabExporter extends HibernateFIReader {
         if (interaction.getEvidence() == null)
             builder.append("\t").append(NA_LABEL);
         else
-            builder.append("\tNBC:").append(interaction.getEvidence().getProbability());
+            builder.append("\tNBC:").append(interaction.getEvidence().getScore());
         // Optional: pathway source for extracted FIs
         if (interaction.getEvidence() == null) {
             Set<ReactomeSource> sources = interaction.getReactomeSources();
@@ -126,40 +126,40 @@ public class FIMITabExporter extends HibernateFIReader {
         else {
             builder.append("\t").append(NA_LABEL);
         }
-        // Optional: evidences for predicted
-        if (interaction.getEvidence() != null) {
-            // Want to list positive evidences only
-            List<String> list = new ArrayList<String>();
-            Evidence evidence = interaction.getEvidence();
-            if (evidence.getHumanInteraction())
-                list.add("humanInteraction");
-            if (evidence.getDmePPI())
-                list.add("dmePPI");
-            if (evidence.getCelPPI())
-                list.add("celPPI");
-            if (evidence.getScePPI())
-                list.add("scePPI");
-            if (evidence.getGenewaysPPI())
-                list.add("genewaysPPI");
-            if (evidence.getPfamDomainInt())
-                list.add("pfamDomaintInt");
-            if (evidence.getGoBPSharing())
-                list.add("goBPSharing");
-            if (evidence.getPavlidisGeneExp())
-                list.add("pavlidisGeneExp");
-            if (evidence.getCarlosGeneExp())
-                list.add("carlosGeneExp");
-            builder.append("\t");
-            for (Iterator<String> it = list.iterator(); it.hasNext();) {
-                String evi = it.next();
-                builder.append(evi);
-                if (it.hasNext())
-                    builder.append("|");
-            }
-        }
-        else {
-            builder.append("\t").append(NA_LABEL);
-        }
+//        // Optional: evidences for predicted
+//        if (interaction.getEvidence() != null) {
+//            // Want to list positive evidences only
+//            List<String> list = new ArrayList<String>();
+//            Evidence evidence = interaction.getEvidence();
+//            if (evidence.getHumanInteraction())
+//                list.add("humanInteraction");
+//            if (evidence.getDmePPI())
+//                list.add("dmePPI");
+//            if (evidence.getCelPPI())
+//                list.add("celPPI");
+//            if (evidence.getScePPI())
+//                list.add("scePPI");
+//            if (evidence.getGenewaysPPI())
+//                list.add("genewaysPPI");
+//            if (evidence.getPfamDomainInt())
+//                list.add("pfamDomaintInt");
+//            if (evidence.getGoBPSharing())
+//                list.add("goBPSharing");
+//            if (evidence.getPavlidisGeneExp())
+//                list.add("pavlidisGeneExp");
+//            if (evidence.getCarlosGeneExp())
+//                list.add("carlosGeneExp");
+//            builder.append("\t");
+//            for (Iterator<String> it = list.iterator(); it.hasNext();) {
+//                String evi = it.next();
+//                builder.append(evi);
+//                if (it.hasNext())
+//                    builder.append("|");
+//            }
+//        }
+//        else {
+//            builder.append("\t").append(NA_LABEL);
+//        }
         fu.printLine(builder.toString());
     }
     

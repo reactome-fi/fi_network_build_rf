@@ -29,6 +29,7 @@ public class PantherConstants {
     public static final String SYNONYM_LABEL = "Synonym";
     public static final String LONG_NAME_LABEL = "Long Name";
     public static final String ACCESSION_LABEL = "Accession";
+    public static final String PANTHER_LINK_LABEL = "Pathway Link";
     public static final String HETERODIMER_MEMBER_INFO_LABEL = "Heterodimer Member Info";
     public static final String POSITION_TO_COMPARTMENT_ELM_NAME = "positionToCompartment";
     public static final String SPECIES_IDENTITY_ELM_NAME = "speciesIdentity";
