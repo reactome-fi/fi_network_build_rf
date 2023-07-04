@@ -3,25 +3,120 @@
         "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
         "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping package="org.reactome.funcInt">
-    <!-- All are simple properties and want to make lazy not true -->
-    <class name="Evidence" table="evidence" batch-size="100" lazy="false">
-        <id name="dbId" column="dbId">
-            <generator class="native" />
-        </id>
-        <property name="humanInteraction" />
-        <!-- property name="orthoInteraction" / -->
-        <property name="scePPI" column="yeastInteraction" />
-        <property name="dmePPI" column="dmeInteraction" />
-        <property name="celPPI" column="celInteraction" />
-        <property name="mousePPI" column="mousePPI" />
-        <property name="pfamDomainInt" column="pfamDomainInteraction" />
-        <property name="goBPSharing" />
-        <property name="pavlidisGeneExp" />
-        <property name="carlosGeneExp" />
-        <!-- geneExp is mapped to an enum type GeneExpressionType -->
-        <!--  property name="geneExp" 
-                  type="org.reactome.funcInt.HibGeneExpressionType" / -->
-        <!-- property name="goBPSemanticSimilarity" / -->
-        <property name="probability" />
-    </class>
+	<!-- All are simple properties and want to make lazy not true -->
+	<class name="Evidence" table="evidence" batch-size="100"
+		lazy="false">
+		<id name="dbId" column="dbId">
+			<generator class="native" />
+		</id>
+		
+		<property name="humanPPI" />
+		<property name="mousePPI" />
+		<property name="flyPPI" />
+		<property name="wormPPI" />
+		<property name="yeastPPI" />
+		<property name="domainInteractions" />
+		<property name="gOBPSharing" />
+		<property name="achilles" />
+		<property name="encodetf" />
+		<property name="encodetfppi" />
+		<property name="gadhighlevel" />
+		<property name="generif" />
+		<property name="genesigdb" />
+		<property name="gobp" />
+		<property name="gomf" />
+		<property name="hpo" />
+		<property name="hubs" />
+		<property name="hugenavigator" />
+		<property name="jensencompartmenttextmining" />
+		<property name="jensendiseasecurated" />
+		<property name="jensendiseasetextmining" />
+		<property name="jensentissuetextmining" />
+		<property name="lincscmapchemical" />
+		<property name="msigdbcomp" />
+		<property name="nursa" />
+		<property name="phosphositetextmining" />
+		<property name="proteomicsdb" />
+		<property name="GTEx_Adipose_Subcutaneous" />
+		<property name="GTEx_Adipose_Visceral_Omentum" />
+		<property name="GTEx_AdrenalGland" />
+		<property name="GTEx_Artery_Aorta" />
+		<property name="GTEx_Artery_Coronary" />
+		<property name="GTEx_Artery_Tibial" />
+		<property name="GTEx_Brain_Amygdala" />
+		<property name="GTEx_Brain_Caudate_basalganglia" />
+		<property name="GTEx_Brain_CerebellarHemisphere" />
+		<property name="GTEx_Brain_Cerebellum" />
+		<property name="GTEx_Brain_Cortex" />
+		<property name="GTEx_Brain_FrontalCortex_BA9" />
+		<property name="GTEx_Brain_Hippocampus" />
+		<property name="GTEx_Brain_Hypothalamus" />
+		<property name="GTEx_Brain_Nucleusaccumbens_basalganglia" />
+		<property name="GTEx_Brain_Spinalcord_cervicalc_1" />
+		<property name="GTEx_Brain_Substantianigra" />
+		<property name="GTEx_Breast_MammaryTissue" />
+		<property name="GTEx_Cells_Culturedfibroblasts" />
+		<property name="GTEx_Cells_EBV_transformedlymphocytes" />
+		<property name="GTEx_Colon_Sigmoid" />
+		<property name="GTEx_Colon_Transverse" />
+		<property name="GTEx_Esophagus_GastroesophagealJunction" />
+		<property name="GTEx_Esophagus_Mucosa" />
+		<property name="GTEx_Esophagus_Muscularis" />
+		<property name="GTEx_Heart_AtrialAppendage" />
+		<property name="GTEx_Heart_LeftVentricle" />
+		<property name="GTEx_Kidney_Cortex" />
+		<property name="GTEx_Liver" />
+		<property name="GTEx_Lung" />
+		<property name="GTEx_MinorSalivaryGland" />
+		<property name="GTEx_Muscle_Skeletal" />
+		<property name="GTEx_Nerve_Tibial" />
+		<property name="GTEx_Ovary" />
+		<property name="GTEx_Pancreas" />
+		<property name="GTEx_Pituitary" />
+		<property name="GTEx_Prostate" />
+		<property name="GTEx_Skin_All" />
+		<property name="GTEx_Skin_NotSunExposed_Suprapubic" />
+		<property name="GTEx_Skin_SunExposed_Lowerleg" />
+		<property name="GTEx_SmallIntestine_TerminalIleum" />
+		<property name="GTEx_Spleen" />
+		<property name="GTEx_Stomach" />
+		<property name="GTEx_Testis" />
+		<property name="GTEx_Thyroid" />
+		<property name="GTEx_Uterus" />
+		<property name="GTEx_Vagina" />
+		<property name="GTEx_WholeBlood" />
+		<property name="TCGA_ACC" />
+		<property name="TCGA_BLCA" />
+		<property name="TCGA_BRCA" />
+		<property name="TCGA_CESC" />
+		<property name="TCGA_CHOL" />
+		<property name="TCGA_COAD" />
+		<property name="TCGA_DLBC" />
+		<property name="TCGA_ESCA" />
+		<property name="TCGA_GBM" />
+		<property name="TCGA_HNSC" />
+		<property name="TCGA_KICH" />
+		<property name="TCGA_KIRC" />
+		<property name="TCGA_KIRP" />
+		<property name="TCGA_LGG" />
+		<property name="TCGA_LIHC" />
+		<property name="TCGA_LUAD" />
+		<property name="TCGA_LUSC" />
+		<property name="TCGA_MESO" />
+		<property name="TCGA_OV" />
+		<property name="TCGA_PAAD" />
+		<property name="TCGA_PCPG" />
+		<property name="TCGA_PRAD" />
+		<property name="TCGA_READ" />
+		<property name="TCGA_SARC" />
+		<property name="TCGA_SKCM" />
+		<property name="TCGA_STAD" />
+		<property name="TCGA_TGCT" />
+		<property name="TCGA_THCA" />
+		<property name="TCGA_THYM" />
+		<property name="TCGA_UCEC" />
+		<property name="TCGA_UCS" />
+		
+		<property name="score" />
+	</class>
 </hibernate-mapping>

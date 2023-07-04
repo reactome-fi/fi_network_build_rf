@@ -3,10 +3,11 @@
 <project name="package" default="FINetworkJar" basedir="..">
 	<property name="targetDir" value="install_jar" />
 	<property name="projectDir" value="${basedir}" />
-	<property name="projectVersion" value="1.0.2" />
+	<property name="projectVersion" value="2.0.0" />
 	<property name="projectJar" value="${targetDir}/build-${projectVersion}.jar" />
 	
 	<!-- Package some needed classes from the caBigR3 project -->
+	<!-- For the time being, the installed FI network should be in java 1.8 for the corews app -->
 	<target name="FINetworkJar">
 		<delete file="${projectJar}" />
 		<jar destfile="${projectJar}">

@@ -76,6 +76,9 @@ public class RFPredictionResultAnalyzer {
         
         // Need to remove annotated FIs from normalized predicted FIs
         // Annotated FIs should be normalized already
+        // The above may not be true since some old names may be used. Therefore, we need to use the name
+        // normalized version even though they may have the same number of the annotated FIs.
+        annotatedFIsInGenes = annotatedFIsInGenes1;
         predictedFIs.removeAll(annotatedFIsInGenes); 
         reportNumbers(predictedFIs, "Remove annotateFIs in normalized predicted FIs", false);
         
@@ -83,14 +86,19 @@ public class RFPredictionResultAnalyzer {
         totalFIs.addAll(annotatedFIsInGenes);
         reportNumbers(totalFIs, "Total FIs in Genes", false);
         // Output these files
-        logger.info("Saving FIs...");
-        String fileName = FIConfiguration.getConfiguration().get("GENE_FI_FILE_NAME");
-        FileUtility fu = new FileUtility();
-        fu.saveInteractions(totalFIs, fileName);
-        fileName = FIConfiguration.getConfiguration().get("GENE_FI_PATHWAY_FILE_NAME");
-        fu.saveInteractions(annotatedFIs, fileName);
-        fileName = FIConfiguration.getConfiguration().get("GENE_FI_PREDICTED_FILE_NAME");
-        fu.saveInteractions(predictedFIs, fileName);
+        // Don't save these files to avoid any confusion!
+        // The mapping from UniProt to Genes is based on external UniProt files. However,
+        // the final output files to be used in the cytoscape app needs to be mapped based on the
+        // two databases: FI_xxxx and reactome_plug_i_xx. Otherwise, some of genes may not be 
+        // mapped to the database because of the version issues!
+//        logger.info("Saving FIs...");
+//        String fileName = FIConfiguration.getConfiguration().get("GENE_FI_FILE_NAME");
+//        FileUtility fu = new FileUtility();
+//        fu.saveInteractions(totalFIs, fileName);
+//        fileName = FIConfiguration.getConfiguration().get("GENE_FI_PATHWAY_FILE_NAME");
+//        fu.saveInteractions(annotatedFIsInGenes, fileName);
+//        fileName = FIConfiguration.getConfiguration().get("GENE_FI_PREDICTED_FILE_NAME");
+//        fu.saveInteractions(predictedFIs, fileName);
         logger.info("Done.");
     }
     

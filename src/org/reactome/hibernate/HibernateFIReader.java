@@ -318,7 +318,7 @@ public class HibernateFIReader extends HibernateFIPersistence {
     }
     
     protected List fetchPredictedFIs(Session session) throws Exception {
-        Query query = session.createQuery("FROM Interaction as i WHERE i.evidence.probability >= ?");
+        Query query = session.createQuery("FROM Interaction as i WHERE i.evidence.score >= ?");
         query.setDouble(0, CUT_OFF_VALUE);
         List list = query.list();
         System.out.println("Total interactions from prediction: " + list.size());

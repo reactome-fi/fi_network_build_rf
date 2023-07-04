@@ -292,6 +292,7 @@ public class FINetworkBuilder {
 //            return;
         // Create a map from pathway fis to their original sources
         logger.info("Running HibernateFIReader.generateFIInGeneSourceFile()...");
+        hibernateReader = new HibernateFIReader();
         hibernateReader.generateFIInGeneSourceFile();
 
         // Generate the largest graph component
