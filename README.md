@@ -6,3 +6,12 @@ This project is the updated version of the FI network construction project. The 
 * Integrate the predicted results from the fi-network-ml project together with extracted pathway FIs to develop a FI network database and Cytoscape files so that they can be used to update ReactomeFIViz.
 
 Note: Some of jar files need to be installed locally. Use ant scripts in the ant folder and jar files in the install_jar to do that. Please note the license statement for jacksum.jar.
+
+The following protege related files in the lib folder need to be installed locally so that they can be used by maven (version, groupId are all for the convenience. Not the original information)
+
+-- protege.jar: groupId=org.protege, artifctId=protege version=4.0.0
+-- protege-owl.jar: artictId=protege-owl version=4.0.0
+-- jena.jar: artifactId=jena version=4.0.0
+-- rdf-api-2001-01-19.jar: artifactId=rdf-api version=2001-01-19
+-- owlsyntax.jar: artifactId=owlsyntax version=4.0.0
+-- xercesImpl.jar: artifactId=xercesImpl version=4.0.0

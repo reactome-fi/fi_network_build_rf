@@ -659,60 +659,6 @@ public class ProteinAndInteractionCount {
                         "Panther",
                         reactomeIds,
                         swissProtIds);
-        
-        // Check with PPIs
-        Set<String> ppis = fu.loadInteractions(FIConfiguration.getConfiguration().get("IREFINDEX_HUMAN_PPI_FILE"));
-        Set<String> totalIds = InteractionUtilities.grepIDsFromInteractions(ppis);
-        UniProtAnalyzer uniProtAnalyzer = new UniProtAnalyzer();
-        Map<String, String> uniProtIdMap = uniProtAnalyzer.loadUniProtIDsMap();
-        Map<String, String> swissProtIdMap = uniProtAnalyzer.loadSwissProtIDsMap();
-        System.out.println("\nTotal ids from iRefIndex PPIs: " + totalIds.size());
-        reactomeIds.addAll(totalIds);
-        System.out.println("Total ids after merging: " + reactomeIds.size());
-        reactomeIds.retainAll(swissProtIdMap.keySet());
-        int totalSwissProtId = new HashSet<String>(swissProtIdMap.values()).size();
-        double percentage = reactomeIds.size() / (double) totalSwissProtId;
-        System.out.println("Total SwissProt ids after merging: " + reactomeIds.size() + 
-                           " (" + percentage + ")");
-        
-        //        // Ids from CellMap
-        //        String cellmapFileName = "datasets/cellmap_may_2006/CellMap.rtpj";
-        //        countUniProtIds(cellmapFileName, 
-        //                        "CellMap",
-        //                        reactomeIds,
-        //                        swissProtIds);     
-        ////        // Ids from INOH
-        ////        String inohFileName = FIConfiguration.getConfiguration().get("INOH_DIR + "INOH.rtpj";
-        ////        countUniProtIds(inohFileName,
-        ////                        "INOH",
-        ////                        reactomeIds,
-        ////                        swissProtIds);
-        //        // Check with ids from GeneExpression
-        //        String geneExpFile = "datasets/microarray/PrietoCarlos/union60InUniProt.txt";
-        //        Set<String> idsFromExp = new FileUtility().loadInteractionTerms(geneExpFile, "\t");
-        //        // Do a simple clean-up: remove spliceform
-        //        Set<String> idCopy = new HashSet<String>();
-        //        countUniProtIds(idsFromExp, 
-        //                        "Array Data Set",
-        //                        reactomeIds,
-        //                        swissProtIds);
-        //        // Check ids from IntAct proteins
-        //        // Note: Some of ids in IntAct are from non-human species (e.g. Rat)
-        //        String intActFileName = FIConfiguration.getConfiguration().get("INTACT_DIR + "IntAct.rtpj";
-        //        countUniProtIds(intActFileName, 
-        //                        "IntAct", 
-        //                        reactomeIds, 
-        //                        swissProtIds);
-        //        String biogridFileName = FIConfiguration.getConfiguration().get("BIOGRID_DIR + "BioGrid.rtpj";
-        //        countUniProtIds(biogridFileName,
-        //                        "BioGrid",
-        //                        reactomeIds,
-        //                        swissProtIds);
-        //        String hprdFileName = FIConfiguration.getConfiguration().get("HPRD_DIR + "HPRD.rtpj";
-        //        countUniProtIds(hprdFileName,
-        //                        "HPRD",
-        //                        reactomeIds,
-        //                        swissProtIds);
     }
     
     private void countUniProtIds(String projectFileName,

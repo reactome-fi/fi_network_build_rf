@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.reactome.fi</groupId>
     <artifactId>fi-network-build-rf</artifactId>
@@ -9,8 +11,10 @@
             <artifactId>curator-tool</artifactId>
             <version>1.0.0</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/nz.ac.waikato.cms.weka/weka-stable -->
-        <!-- Use this version. There is something wrong with the latest version of weka at maven -->
+        <!--
+        https://mvnrepository.com/artifact/nz.ac.waikato.cms.weka/weka-stable -->
+        <!-- Use this version. There is something wrong with the latest version
+        of weka at maven -->
         <dependency>
             <groupId>nz.ac.waikato.cms.weka</groupId>
             <artifactId>weka-stable</artifactId>
@@ -74,14 +78,15 @@
             <version>2.3.1</version>
         </dependency>
         <!-- Provide the actual implementation for the above api.
-            see: https://stackoverflow.com/questions/51916221/javax-xml-bind-jaxbexception-implementation-of-jaxb-api-has-not-been-found-on-mo -->
+            see:
+        https://stackoverflow.com/questions/51916221/javax-xml-bind-jaxbexception-implementation-of-jaxb-api-has-not-been-found-on-mo -->
         <!-- JAXB RI -->
         <dependency>
             <groupId>com.sun.xml.bind</groupId>
             <artifactId>jaxb-impl</artifactId>
             <version>2.3.4</version>
         </dependency>
-        
+
         <dependency>
             <groupId>jonelo</groupId>
             <artifactId>jacksum</artifactId>
@@ -92,6 +97,40 @@
             <artifactId>junit</artifactId>
             <version>4.13.2</version>
         </dependency>
+        
+        <!-- Protege API for pathway converting. These jar files are installed locally. 
+        See README.md. groupId, artifactId and versions are not the original ones. -->
+        <dependency>
+            <groupId>org.protege</groupId>
+            <artifactId>protege</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.protege</groupId>
+            <artifactId>protege-owl</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.protege</groupId>
+            <artifactId>jena</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.protege</groupId>
+            <artifactId>rdf-api</artifactId>
+            <version>2001-01-19</version>
+        </dependency>
+        <dependency>
+            <groupId>org.protege</groupId>
+            <artifactId>owlsyntax</artifactId>
+            <version>4.0.0</version>
+        </dependency>   
+        <dependency>
+            <groupId>org.protege</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>4.0.0</version>
+        </dependency>       
+
         <!-- To support some JavaScript-based plot, which provide a much better 
             plot than JFreeChart -->
         <dependency>
@@ -120,7 +159,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.0</version>
                 <configuration>
-                    <!-- For the time being, we still need 1.0 for the FI model classes. -->
+                    <!-- For the time being, we still need 1.0 for the FI model
+                    classes. -->
                     <source>11</source>
                     <target>11</target>
                 </configuration>

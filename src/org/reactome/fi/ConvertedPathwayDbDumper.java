@@ -35,7 +35,7 @@ public class ConvertedPathwayDbDumper {
     private String[] getFileNames() {
         // Keep the order
         String[] fileNames = new String[] {
-                FIConfiguration.getConfiguration().get("KEGG_CONVERTED_FILE"),
+//                FIConfiguration.getConfiguration().get("KEGG_CONVERTED_FILE"),
                 FIConfiguration.getConfiguration().get("NATURE_PID_CURATED_CONVERTED"),
                 FIConfiguration.getConfiguration().get("NATURE_PID_BIOCARTA_CONVERTED"),
                 FIConfiguration.getConfiguration().get("PANTHER_CONVERTED_FILE"),

@@ -27,6 +27,7 @@ import org.reactome.fi.util.FileUtility;
 import org.reactome.fi.util.InteractionUtilities;
 import org.reactome.fi.util.PositiveChecker;
 import org.reactome.fi.util.Value;
+import org.reactome.hibernate.HibernateFIReader;
 import org.reactome.tred.TREDAnalyzer;
 import org.reactome.weka.FeatureHandlerForV3;
 
@@ -43,6 +44,37 @@ public class FIFileAnalyzer {
     
     public FIFileAnalyzer() {
         fu = new FileUtility();
+    }
+    
+    @Test
+    public void checkKEGGFIsInOthers() throws Exception {
+        Set<String> predictedFIs = fu.loadInteractions(FIConfiguration.getConfiguration().get("GENE_FI_PREDICTED_FILE_NAME"));
+        System.out.println("Total predicted FIs in genes: " + predictedFIs.size());
+        Set<String> pathwayFIs = fu.loadInteractions(FIConfiguration.getConfiguration().get("GENE_FI_PATHWAY_FILE_NAME"));
+        System.out.println("Total pathway FIs in genes: " + pathwayFIs.size());
+        Set<String> keggFIs = fu.loadInteractions(FIConfiguration.getConfiguration().get("RESULT_DIR") + "/../2022/FIs_KEGG Pathway.txt");
+        System.out.println("Total KEGG FIs in UniProt: " + keggFIs.size());
+        // Do a mapping
+        HibernateFIReader fiReader = new HibernateFIReader();
+        Map<String, String> id2name = fiReader.generateAccessionToProteinNames();
+        Set<String> keggFIsInGenes = new HashSet<>();
+        for (String fi : keggFIs) {
+            String[] tokens = fi.split("\t");
+            String gene1 = id2name.get(tokens[0]);
+            String gene2 = id2name.get(tokens[1]);
+            if (gene1 == null || gene2 == null || gene1.equals(gene2))
+                continue;
+            String geneFI = InteractionUtilities.generateFIFromGene(gene1, gene2);
+            if (geneFI == null)
+                continue;
+            keggFIsInGenes.add(geneFI);
+        }
+        System.out.println("Kegg FIs in genes: " + keggFIsInGenes.size());
+        Set<String> copy = new HashSet<>(keggFIsInGenes);
+        copy.removeAll(pathwayFIs);
+        System.out.println("After removing pathway fis: " + copy.size());
+        copy.removeAll(predictedFIs);
+        System.out.println("After removing predicted FIs: " + copy.size());
     }
     
     @Test

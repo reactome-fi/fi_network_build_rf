@@ -19,19 +19,13 @@ import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 import org.reactome.b2rPostProcessor.NciPIDConverterRunner;
 import org.reactome.data.EncodeTFTargetToReactomeConverter;
-import org.reactome.data.EnsemblAnalyzer;
-import org.reactome.data.GODataAnalyzerV2;
 import org.reactome.data.GOTermLoader;
-import org.reactome.data.IRefIndexMITTabAnalyzer;
 import org.reactome.data.MicroarrayDataAnalyzer;
-import org.reactome.data.PfamAnalyzer;
 import org.reactome.data.ReactomeAnalyzer;
 import org.reactome.data.UniProtAnalyzer;
 import org.reactome.fi.util.FIConfiguration;
 import org.reactome.hibernate.HibernateFIReader;
-import org.reactome.kegg.KeggToReactomeConverter;
 import org.reactome.panther.PantherToReactomeConverterTest;
-import org.reactome.psi.data.PsiMiOrthologyAnalyzer;
 import org.reactome.tred.TREDToReactomeConverter;
 
 /**
@@ -84,9 +78,10 @@ public class FINetworkBuilder {
      */
     @Test
     public void convertPathwayDBs() throws Exception {
-        KeggToReactomeConverter keggConverter = new KeggToReactomeConverter();
-        logger.info("Running KeggToReactomeConverter.runBatchConver()...");
-        keggConverter.runBatchConvert();
+        // As of FI_2024, we will not use KEGG any more to avoid the license issue!
+//        KeggToReactomeConverter keggConverter = new KeggToReactomeConverter();
+//        logger.info("Running KeggToReactomeConverter.runBatchConver()...");
+//        keggConverter.runBatchConvert();
         
         NciPIDConverterRunner nciPidConverter = new NciPIDConverterRunner();
         logger.info("Running NciPIDConverrerRunner.runConvertOfCurated()...");
@@ -102,8 +97,6 @@ public class FINetworkBuilder {
         // Gene expressions have been used as support evidences for TF/Target interactions
         // from ENCODE. So have to call these methods first in order to get co-expression
         // values
-        // These two methods will be called again in method prepareNBCFeatures(). The results
-        // should be the same!
         MicroarrayDataAnalyzer microarrayAnalyzer = new MicroarrayDataAnalyzer();
         logger.info("Running MicroarrayDataAnalyzer.normalizeLeeGeneExp()...");
         microarrayAnalyzer.normalizeLeeGeneExp();
@@ -149,104 +142,16 @@ public class FINetworkBuilder {
         logger.info("Running FIFileAnalyzer.dumpPathwayFIs()...");
         FIFileAnalyzer fiFileAnalyzer = new FIFileAnalyzer();
         fiFileAnalyzer.dumpPathwayFIs();
-    }
+    }  
     
     /**
-     * Run this method to prepare features for NBC training.
+     * Check the FIs from the prediction score file from Python. At the time, no files are generated really.
      * @throws Exception
      */
     @Test
-    public void prepareNBCFeatures() throws Exception {
-        // The following statements are used for PPI based features
-        EnsemblAnalyzer ensemblAnalyzer = new EnsemblAnalyzer();
-        logger.info("Running EnsemblAnalyzer.dumpProteinFamilies()...");
-        ensemblAnalyzer.dumpProteinFamilies();
-        // Extract PPIs from PSITAB files
-        IRefIndexMITTabAnalyzer iRefIndexAnalyzer = new IRefIndexMITTabAnalyzer();
-        logger.info("Running IRefIndexMITTabAnalyzer.loadHumanPPIs()...");
-        iRefIndexAnalyzer.loadHumanPPIs();
-        logger.info("Running IRefIndexMITTabAnalyzer.loadFlyPPIs()...");
-        iRefIndexAnalyzer.loadFlyPPIs();
-        logger.info("Running IRefIndexMITTabAnalyzer.loadWormPPIs()...");
-        iRefIndexAnalyzer.loadWormPPIs();
-        logger.info("Running IRefIndexMITTabAnalyzer.loadYeastPPIs()...");
-        iRefIndexAnalyzer.loadYeastPPIs();
-        logger.info("Running IRefIndexMITTabAnalyzer.loadMousePPIs()...");
-        iRefIndexAnalyzer.loadMousePPIs();
-        // Map PPIs in other species to human PPIs via ensembl compara
-        PsiMiOrthologyAnalyzer psimiAnalyzer = new PsiMiOrthologyAnalyzer();
-        logger.info("Running PsiMiOrthologyAnalyzer.generateHumanPPIsFromYeastInUniProt()...");
-        psimiAnalyzer.generateHumanPPIsFromYeastInUniProt();
-        logger.info("Running PsiMiOrthologyAnalyzer.generateHumanPPIsFromWormInUniProt()...");
-        psimiAnalyzer.generateHumanPPIsFromWormInUniProt();
-        logger.info("Running PsiMiOrthologyAnalyzer.generateHumanPPIsFromFlyInUniProt()...");
-        psimiAnalyzer.generateHumanPPIsFromFlyInUniProt();
-        logger.info("Running PsiMiOrthologyAnalyzer.generateHumanPPIsFromMouseInUniProt()...");
-        psimiAnalyzer.generateHumanPPIsFromMouseInUniProt();
-        // Check PPIs' odds ratioes
-        logger.info("Checking odds ratio...");
-        psimiAnalyzer.testPPIsFeatures();
-        
-        // The following statements are used for gene expression based features: two
-        // data sets have been used here.
-        MicroarrayDataAnalyzer microarrayAnalyzer = new MicroarrayDataAnalyzer();
-        logger.info("Running MicroarrayDataAnalyzer.normalizeLeeGeneExp()...");
-        microarrayAnalyzer.normalizeLeeGeneExp();
-        logger.info("Checking its odds ratio...");
-        microarrayAnalyzer.checkCoExpFromPavlidis();
-        logger.info("Running MicroarrayDataAnalyzer.generatePrietoCarlosGeneExpFile()...");
-        microarrayAnalyzer.generatePrietoCarlosGeneExpFile();
-        logger.info("Check its odds ratio...");
-        microarrayAnalyzer.checkCoExpFromPrietoCarlos();
-        
-        // Domain-domain interactions
-        PfamAnalyzer pfamAnalyzer = new PfamAnalyzer();
-        logger.info("Running PfamAnalyzer.convertIntToPfamIDs()...");
-        pfamAnalyzer.convertIntToPfamIDs();
-        logger.info("Checking its odds ratio...");
-        pfamAnalyzer.testPfamFeature();
-        
-        // Nothing needs to be generated. But we want to check GO features
-        GODataAnalyzerV2 goAnalyzer = new GODataAnalyzerV2();
-        logger.info("Checking GO features...");
-        goAnalyzer.testGOFeatures();
-    }
-    
-    /**
-     * Train NBC, create data for ROC curve, check protein coverge and generate
-     * a predicted FI file. The data file generated from calcualteROCPoints() should
-     * be used in R for generating ROC curve and calculate AUC.
-     * @throws Exception
-     */
-    @Test
-    public void trainNBC() throws Exception {
-        NBCAnalyzer nbcAnalyzer = new NBCAnalyzer();
-        logger.info("Running NBCAnalyzer.calculateNBCBasedOnReactome()...");
-        nbcAnalyzer.calculateNBCBasedOnReactome();
-        logger.info("Running NBCAnalyzer.calculateROCPoints()...");
-        nbcAnalyzer.calculateROCPoints();
-        // Generate protein pairs having domain-domain interactions 
-        logger.info("Running NBCAnalyzer.checkSharedBPPairAndDomainPairs()...");
-        nbcAnalyzer.checkSharedBPPairAndDomainPair();
-        logger.info("Running checkCutoffValueForPredictedFIs()...");
-        nbcAnalyzer.checkCutoffValueForPredictedFIs();
-        // At this stage, NBCGUITest() should be run to check contributions of each
-        // feature and see if anything is weird!
-        // This method should be run separately
-        // NBCGUITest.main()
-    }
-    
-    /**
-     * After investigating the results from method trainNBC(), choose an appropriate 
-     * cutoff value, and set in the configuration file: results/configuration.prop.
-     * Usually 0.50 or above should be chosen unless you have a strong reason not so.
-     * @throws Exception
-     */
-    @Test
-    public void predictFIs() throws Exception {
-        NBCAnalyzer nbcAnalyzer = new NBCAnalyzer();
-        logger.info("Running NBCAnalyzer.generatePredictedFIs()...");
-        nbcAnalyzer.generatePredictedFIs();
+    public void checkFIs() throws Exception {
+        RFPredictionResultAnalyzer rfAnalyzer = new RFPredictionResultAnalyzer();
+        rfAnalyzer.generateFIFiles();
     }
     
     /**

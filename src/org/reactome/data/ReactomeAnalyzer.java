@@ -87,10 +87,11 @@ public class ReactomeAnalyzer {
 //        dataSourceIds.add(sourceId);
         sourceId = fetchDatasourceId("BioCarta - Imported by PID", null, dba);
         dataSourceIds.add(sourceId);
-        sourceId = fetchDatasourceId(KeggToReactomeConverter.KEGG_PATHWAY_DB_NAME,
-                                     KeggToReactomeConverter.KEGG_PATHWAY_URL,
-                                     dba);
-        dataSourceIds.add(sourceId);
+        // No KEGG as of FI_2024
+//        sourceId = fetchDatasourceId(KeggToReactomeConverter.KEGG_PATHWAY_DB_NAME,
+//                                     KeggToReactomeConverter.KEGG_PATHWAY_URL,
+//                                     dba);
+//        dataSourceIds.add(sourceId);
         for (Long dataSourceId : dataSourceIds) {
             ReactomeAnalyzer tmp = new CPathAnalyzer();
             tmp.setDataSourceId(dataSourceId);

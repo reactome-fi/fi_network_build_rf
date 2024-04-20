@@ -89,7 +89,7 @@ public class RFPredictionResultAnalyzer {
         // Don't save these files to avoid any confusion!
         // The mapping from UniProt to Genes is based on external UniProt files. However,
         // the final output files to be used in the cytoscape app needs to be mapped based on the
-        // two databases: FI_xxxx and reactome_plug_i_xx. Otherwise, some of genes may not be 
+        // two databases: FI_xxxx and reactome_plus_i_xx. Otherwise, some of genes may not be 
         // mapped to the database because of the version issues!
 //        logger.info("Saving FIs...");
 //        String fileName = FIConfiguration.getConfiguration().get("GENE_FI_FILE_NAME");

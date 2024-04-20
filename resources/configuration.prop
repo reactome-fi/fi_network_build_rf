@@ -1,20 +1,25 @@
 # This is a configuration file. Make sure all directories and files are correct
-YEAR=2022
+# Skip 2023 to use 2024 directly. Make more sense.
+# Make sure no space after 2024!!!
+YEAR=2024
+DATE=04152024
 RESULT_DIR=/Volumes/ssd/results/reactome-fi/fi_network_build_rf/${YEAR}
 # the data sets directory
 #DATA_SET_DIR=/Volumes/ssd/datasets
 # The weird format used in 2022 during the transition from NBC to RF
-DATA_SET_DIR=/Volumes/ssd/datasets_2022_fi/fi-data
+#DATA_SET_DIR=/Volumes/ssd/datasets_2022_fi/fi-data
+# 2024 version consolidated all datasets into a single folder.
+DATA_SET_DIR=/Volumes/ssd/datasets_fi_rf/FI_2024
 
 # local database that is used as the data source
-REACTOME_SOURCE_DB_NAME=reactome_83_plus_i
+REACTOME_SOURCE_DB_NAME=reactome_88_plus_i
 # To get the mouse pathways
-MOUSE_SOURCE_DB_NAME=reactome_83_plus_i
+MOUSE_SOURCE_DB_NAME=reactome_88_plus_i
 DB_USER=root
 DB_PWD=macmysql01
 
 # A snapshot of gk_central database used to copy human ReferenceGeneProducts
-REACTOME_GK_CENTRAL_DB_NAME=gk_central_120622
+REACTOME_GK_CENTRAL_DB_NAME=gk_central_04152024
 
 # This database name should be the same as the name used in funcIntHibernate.cfg.xml
 FI_DB_NAME=FI_${YEAR}
@@ -22,15 +27,8 @@ FI_DB_NAME=FI_${YEAR}
 # Used to dump databases
 MYSQLDUMP=/usr/local/mysql/bin/mysqldump
 
-# Two fene expression data files
-LEE_GENE_EXP_FILE_SOURCE=${DATA_SET_DIR}/microarray/Pavlidis/GeneExpWith3FromPavlidis.txt
-LEE_GENE_EXP_FILE=${RESULT_DIR}/LeeGeneExp.txt
-
-PRIETO_PAIRS_FILE=${DATA_SET_DIR}/microarray/PrietoCarlos/union60.txt
-PRIETO_GENE_EXP_FILE=${RESULT_DIR}/PrietoGeneExp.txt
 # FIs extracted from Reactome and converted pathway DBs
 REACTOME_FI_FILE=${RESULT_DIR}/FIs_Reactome.txt
-KEGG_FI_FILE=${RESULT_DIR}/FIs_KEGG Pathway.txt
 NCI_PID_FI_FILE=${RESULT_DIR}/FIs_Pathway Interaction Database.txt
 NCI_PID_BIOCARTA_FI_FILE=${RESULT_DIR}/FIs_BioCarta - Imported by PID.txt
 PANTHER_FI_FILE=${RESULT_DIR}/FIs_pantherdb.txt
@@ -40,12 +38,12 @@ TRED_FI_FILE=${RESULT_DIR}/FIs_TRED.txt
 # Let the pathway enrichment analysis software to take care of the filtering
 MINIMUM_PAHTWAY_SIZE = 1
 GENE_FI_BIG_COMP_FILE_NAME=${RESULT_DIR}/FIsInGene_070323_BigComp.txt
-GENE_FI_FILE_NAME=${RESULT_DIR}/FIsInGene_070323.txt
+GENE_FI_FILE_NAME=${RESULT_DIR}/FIsInGene_${DATE}.txt
 # This file will be handled later on using the caBigR3Web project. However, it is listed here
 # for creating the configuration file
 GENE_FI_ANNOTATION_FILE_NAME=${RESULT_DIR}/FIsInGene_070323_with_annotations.txt
-GENE_FI_PATHWAY_FILE_NAME=${RESULT_DIR}/FIsInGene_Pathway_070323.txt
-GENE_FI_PREDICTED_FILE_NAME=${RESULT_DIR}/FIsInGene_Predicted_070323.txt
+GENE_FI_PATHWAY_FILE_NAME=${RESULT_DIR}/FIsInGene_Pathway_${DATE}.txt
+GENE_FI_PREDICTED_FILE_NAME=${RESULT_DIR}/FIsInGene_Predicted_${DATE}.txt
 # Used in order to create a quick map from FIs to their pathway sources
 GENE_FI_PATHWAY_SOURCES_FILE_NAME=${RESULT_DIR}/PathwayFIToSources_070323.txt
 # File for mapping accession to names dumped from the FI network
@@ -69,43 +67,43 @@ MOUSE_REACTOME_GMT_FILE_NAME = ${RESULT_DIR}/MouseReactomePathways_Rel_83_070423
 # From 2022, the cutoff value is for the score predicted by the trained random forest
 # It is much higher than 0.50 to keep the precision similar to the NBC.
 # Including "=" during the checking.
-CUT_OFF_VALUE=0.89d
+#CUT_OFF_VALUE=0.89d
 PREDICTED_FI_FILE=${RESULT_DIR}/PredictedFIs_070423.txt
 
 # Used to control the UniProt version
-UNIPROT_DIR=${DATA_SET_DIR}/UniProt/release_2022_05/
+UNIPROT_DIR=${DATA_SET_DIR}/UniProt/release_2024_02/
     
 # Directory for pFam
 # For 2019 version of the FI network, 32 is used. Not updated in 2019.
+# FI_2024: 33.1 was used for FI_2022. The current release is 37.0. Release 33.1 is
+# the latest version having the interaction file. Therefore, we use this.
 PFAM_DIR_NAME=${DATA_SET_DIR}/Pfam/33.1/
 
-# These parameters are related to KEGG pathways
-KEGG_DIR=${DATA_SET_DIR}/KEGG/122120/
-# Unzipped human KGML files should be in this directory
-KEGG_HSA_KGML_DIR=${KEGG_DIR}/hsa/
-# The converted KEGG pathways is saved in this project file
-KEGG_CONVERTED_FILE=${KEGG_DIR}/KEGG_20Dec2022.rtpj
-# This file is used to map KEGG gene ids to UniProt ids
-KEGG_ID_TO_UNIPROT_MAP_FILE=${KEGG_DIR}/hsa_genes_uniprot.list
+# Two gene expression data files. These two files are not used to train ML. They are now used
+# to attach evidence for TF/Target interactions from ENCODE
+LEE_GENE_EXP_FILE_SOURCE=${DATA_SET_DIR}/microarray/Pavlidis/GeneExpWith3FromPavlidis.txt
+LEE_GENE_EXP_FILE=${RESULT_DIR}/LeeGeneExp.txt
+PRIETO_PAIRS_FILE=${DATA_SET_DIR}/microarray/PrietoCarlos/union60.txt
+PRIETO_GENE_EXP_FILE=${RESULT_DIR}/PrietoGeneExp.txt
 
 # Used for the panther database files
 # Download on Jan 18, 2011
 PANTHER_DIR=${DATA_SET_DIR}/Panther/Version3.6.5
 PANTHER_FILES_DIR=${PANTHER_DIR}/SBML/
 PANTHER_MAPPING_FILE=${PANTHER_DIR}/SequenceAssociationPathway3.6.5.txt
-PANTHER_CONVERTED_FILE=${PANTHER_DIR}/Panther_3_6_5_23Jan2023.rtpj
+PANTHER_CONVERTED_FILE=${PANTHER_DIR}/Panther_3_6_5_${DATE}.rtpj
     
 # Used for the Nature-PID database files
 # There is no need to change the dir since this is not updated any more
-NATURE_PID_DIR=${DATA_SET_DIR}/NCI-Pathways/20Dec2022/
+NATURE_PID_DIR=${DATA_SET_DIR}/NCI-Pathways/01162012/
 NATURE_PID_CURATED=${NATURE_PID_DIR}/NCI-Nature_Curated.bp2.owl
-NATURE_PID_CURATED_CONVERTED=${NATURE_PID_DIR}/Nature_Curated.bp2.20Dec2022.rtpj
+NATURE_PID_CURATED_CONVERTED=${NATURE_PID_DIR}/Nature_Curated.bp2.${DATE}.rtpj
 NATURE_PID_BIOCARTA=${NATURE_PID_DIR}/BioCarta.bp2.owl
-NATURE_PID_BIOCARTA_CONVERTED=${NATURE_PID_DIR}/BioCarta.bp2.20Dec2022.rtpj
+NATURE_PID_BIOCARTA_CONVERTED=${NATURE_PID_DIR}/BioCarta.bp2.${DATE}.rtpj
 
 # This file is used to map Entrez id to UniProt accession number
-IPROCLASS_HUMAN_FILE = ${DATA_SET_DIR}/iproclass/20Dec2022/h_sapiens.tb
-ENTREZ_TO_UNIPROT_MAP_FILE_NAME=${DATA_SET_DIR}/iproclass/20Dec2022/EntrezToUniProt.txt
+IPROCLASS_HUMAN_FILE = ${DATA_SET_DIR}/iproclass/${DATE}/h_sapiens.tb
+ENTREZ_TO_UNIPROT_MAP_FILE_NAME=${DATA_SET_DIR}/iproclass/${DATE}/EntrezToUniProt.txt
 
 # For NCI_Nature
 #NCI_NATURE_DIR=${DATA_SET_DIR}/NCI-Pathways/031709/
@@ -115,18 +113,15 @@ ENSEMBL_COMPARA_DATABASE=ensembl_compara_101
 ENSEMBL_PROTEIN_FAMILIES=${ENSEMBL_DIR}/ProteinFamilies.txt
 #ENSEMBL_PROTEIN_FAMILIES=${ENSEMBL_DIR}/ProteinFamilies_Zebrafish.txt
 # For GO related files
-GO_DIR=${DATA_SET_DIR}/GO/20Dec2022/
+GO_DIR=${DATA_SET_DIR}/GO/${DATE}/
 GOA_FILE_NAME=${GO_DIR}/goa_human.gaf
 # ENCODE data
 ENCODE_DIR=${DATA_SET_DIR}/encode
 ENCODE_TFF_FILE=${ENCODE_DIR}/tf-targets.txt
-ENCODE_TFF_CONVERTED_FILE=${ENCODE_DIR}/tf-targets_20Dec2022.rtpj
+ENCODE_TFF_CONVERTED_FILE=${ENCODE_DIR}/tf-targets_${DATE}.rtpj
 # For TRED files
 TRED_DIR=${DATA_SET_DIR}/TRED/
-TRED_CONVERTED_FILE=${TRED_DIR}/TRED_20Dec2022.rtpj
-
-# Results from random forest training
-RF_PREDICTION_FILE = ${RESULT_DIR}/prediction_results_04Jan2023.csv
+TRED_CONVERTED_FILE=${TRED_DIR}/TRED_${DATE}.rtpj
 
 # The following propertied are used during NBC training
 ROC_CURVE_FILE=${RESULT_DIR}/ROC_100_122921.txt
@@ -140,7 +135,10 @@ WEBAPP_DIR=/usr/local/apache-tomcat/webapps/caBigR3WebApp2022/WEB-INF
 # For converting infor factor graphs
 FACTOR_GRAPH_FILE=${RESULT_DIR}/PathwayDiagramsFactorGraphs.xml.zip
 
+# FI_2024 (0.89 for FI_2022)
+CUT_OFF_VALUE=0.89d
 # Related to prediction results from the trained RF
-RF_PREDICTION_RESULT_FILE=${RESULT_DIR}/prediction_results_04Jan2023.csv
-# The original feature file for prediction
-RF_FEATURE_FILE=${RESULT_DIR}/generated_prediction_file_03Jan2023.csv
+RF_PREDICTION_FILE = ${RESULT_DIR}/prediction_results_04202024.csv
+# The original feature file for prediction that should be used to create the FI network database
+RF_FEATURE_FILE=${RESULT_DIR}/prediction_feature_file_04152024.csv
+PREDICTED_FI_FILE=${RESULT_DIR}/PredictedFIs_${DATE}.txt

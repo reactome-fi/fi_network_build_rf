@@ -6,8 +6,6 @@ package org.reactome.funcInt;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.hibernate.annotations.Entity;
-
 /**
  * This class is used to describe evidence for predicted functional interactions.
  * @author guanming
