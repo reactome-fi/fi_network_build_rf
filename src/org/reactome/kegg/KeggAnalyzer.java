@@ -19,6 +19,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,6 +32,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.log4j.Logger;
+import org.gk.model.GKInstance;
+import org.gk.model.ReactomeJavaConstants;
+import org.gk.persistence.XMLFileAdaptor;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
@@ -392,6 +396,47 @@ public class KeggAnalyzer{
             Set<String> genes = pathwayToGenes.get(pathway);
             System.out.println(pathway + ": " + genes.size() + " " + genes);
         }
+    }
+    
+    /**
+     * Use this method to dump KEGG pathways converted to a simple text file for post analysis.
+     * Note: There are over 700 pathways in KEGG in 2020, the last year we had the license, based on 
+     * the pathway list file. However, only 247 pathways have KGML files, assuming they have relationships
+     * specified. Only these pathways are converted into Reactome. Of these pathways, some of them still 
+     * don't have relations specified. Therefore, we have quite limited number of converted pathways in
+     * Reactome.
+     * @throws IOException
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void dumpNamesOfConvertedPathways() throws Exception {
+        String dirName = "/Volumes/ssd/datasets_fi_rf/datasets_2022_fi/fi-data/KEGG/122120/";
+        String rtpjFileName = dirName + "KEGG_20Dec2022_Dumped.rtpj";
+        String dumpedPathways = dirName + "KEGG_Pathway_Names_12202022.txt";
+        
+        XMLFileAdaptor fileAdaptor = new XMLFileAdaptor();
+        fileAdaptor.setSource(rtpjFileName);
+        
+        Collection<GKInstance> pathways = fileAdaptor.fetchInstancesByClass(ReactomeJavaConstants.Pathway);
+        System.out.println("Total pathways: " + pathways.size());
+        // Let do some filtering
+        
+        FileUtility fu = new FileUtility();
+        fu.setOutput(dumpedPathways);
+        fu.printLine("KEGG_ID\tPathway_Name");
+        int counter = 0;
+        for (GKInstance pathway : pathways) {
+            List<GKInstance> hasEvent = pathway.getAttributeValuesList(ReactomeJavaConstants.hasEvent);
+            if (hasEvent == null || hasEvent.size() == 0)
+                continue; // Nothing there. No use here!
+            GKInstance crossReference = (GKInstance) pathway.getAttributeValue(ReactomeJavaConstants.crossReference);
+            String[] tokens = crossReference.getDisplayName().split(":");
+            String keggId = tokens[tokens.length - 1];
+            fu.printLine(keggId + "\t" + pathway.getDisplayName());
+            counter ++;
+        }
+        System.out.println("Total outputted pathways: " + counter);
+        fu.close();
     }
     
 }

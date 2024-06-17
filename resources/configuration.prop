@@ -2,7 +2,10 @@
 # Skip 2023 to use 2024 directly. Make more sense.
 # Make sure no space after 2024!!!
 YEAR=2024
-DATE=04152024
+# This date is used for building the FI network of 2024
+#DATE=04152024
+# This date is used for generating the files for Cytoscape app for 2024
+DATE=061424
 RESULT_DIR=/Volumes/ssd/results/reactome-fi/fi_network_build_rf/${YEAR}
 # the data sets directory
 #DATA_SET_DIR=/Volumes/ssd/datasets
@@ -12,9 +15,10 @@ RESULT_DIR=/Volumes/ssd/results/reactome-fi/fi_network_build_rf/${YEAR}
 DATA_SET_DIR=/Volumes/ssd/datasets_fi_rf/FI_2024
 
 # local database that is used as the data source
-REACTOME_SOURCE_DB_NAME=reactome_88_plus_i
+REACTOME_RELEASE=88
+REACTOME_SOURCE_DB_NAME=reactome_${REACTOME_RELEASE}_plus_i
 # To get the mouse pathways
-MOUSE_SOURCE_DB_NAME=reactome_88_plus_i
+MOUSE_SOURCE_DB_NAME=reactome_${REACTOME_RELEASE}_plus_i
 DB_USER=root
 DB_PWD=macmysql01
 
@@ -37,38 +41,42 @@ TRED_FI_FILE=${RESULT_DIR}/FIs_TRED.txt
 # The minimum size used for a pathway. Use 1 for all gene-contained pathways.
 # Let the pathway enrichment analysis software to take care of the filtering
 MINIMUM_PAHTWAY_SIZE = 1
-GENE_FI_BIG_COMP_FILE_NAME=${RESULT_DIR}/FIsInGene_070323_BigComp.txt
+GENE_FI_BIG_COMP_FILE_NAME=${RESULT_DIR}/FIsInGene_${DATE}_BigComp.txt
 GENE_FI_FILE_NAME=${RESULT_DIR}/FIsInGene_${DATE}.txt
 # This file will be handled later on using the caBigR3Web project. However, it is listed here
 # for creating the configuration file
-GENE_FI_ANNOTATION_FILE_NAME=${RESULT_DIR}/FIsInGene_070323_with_annotations.txt
+GENE_FI_ANNOTATION_FILE_NAME=${RESULT_DIR}/FIsInGene_${DATE}_with_annotations.txt
 GENE_FI_PATHWAY_FILE_NAME=${RESULT_DIR}/FIsInGene_Pathway_${DATE}.txt
 GENE_FI_PREDICTED_FILE_NAME=${RESULT_DIR}/FIsInGene_Predicted_${DATE}.txt
 # Used in order to create a quick map from FIs to their pathway sources
-GENE_FI_PATHWAY_SOURCES_FILE_NAME=${RESULT_DIR}/PathwayFIToSources_070323.txt
+GENE_FI_PATHWAY_SOURCES_FILE_NAME=${RESULT_DIR}/PathwayFIToSources_${DATE}.txt
 # File for mapping accession to names dumped from the FI network
-PROTEIN_ACCESSION_TO_NAME_FILE = ${RESULT_DIR}/ProteinAccessionToName_070323.txt
+PROTEIN_ACCESSION_TO_NAME_FILE = ${RESULT_DIR}/ProteinAccessionToName_${DATE}.txt
 # We need a flattened list of pathways from Reactome for enrichment analysis
-REACTOME_PATHWAYS = ${RESULT_DIR}/ReactomePathways070423.txt
+REACTOME_PATHWAYS = ${RESULT_DIR}/ReactomePathways${DATE}.txt
 # As of Decemember, 2013, we also want to dump all Reactome pathways in order
 # to do a hierarhy based pathway enrichment analysis
-PROTEIN_ID_TO_REACTOME_PATHWAYS = ${RESULT_DIR}/ProteinIdToReactomePathways070423.txt
-GENE_TO_REACTOME_PATHWAYS = ${RESULT_DIR}/ProteinNameToReactomePathways_Rel_83_070423.txt
+PROTEIN_ID_TO_REACTOME_PATHWAYS = ${RESULT_DIR}/ProteinIdToReactomePathways${DATE}.txt
+GENE_TO_REACTOME_PATHWAYS = ${RESULT_DIR}/ProteinNameToReactomePathways_Rel_${REACTOME_RELEASE}_${DATE}.txt
 # For mouse genes to pathways: added on July 6, 2020
-MOUSE_GENE_TO_REACTOME_PATHWAYS = ${RESULT_DIR}/MouseGeneToReactomePathways_Rel_83_070423.txt
+MOUSE_GENE_TO_REACTOME_PATHWAYS = ${RESULT_DIR}/MouseGeneToReactomePathways_Rel_${REACTOME_RELEASE}_${DATE}.txt
 # For Reactome reaction-based enrichment analysis
-GENE_TO_REACTOME_REACTIONS = ${RESULT_DIR}/ReactomeGenesToReactions070423.txt
-FI_TO_REACTOME_REACTIONS = ${RESULT_DIR}/ReactomeFIsToReactions070423.txt
+GENE_TO_REACTOME_REACTIONS = ${RESULT_DIR}/ReactomeGenesToReactions${DATE}.txt
+FI_TO_REACTOME_REACTIONS = ${RESULT_DIR}/ReactomeFIsToReactions${DATE}.txt
 # Gene sets based on pathways
-PROTEIN_ID_TO_TOPIC = ${RESULT_DIR}/ProteinIdToTopic070423.txt
-GENE_TO_TOPIC = ${RESULT_DIR}/ProteinNameToTopics070423.txt
-REACTOME_GMT_FILE_NAME = ${RESULT_DIR}/ReactomePathways_Rel_83_070423.gmt
-MOUSE_REACTOME_GMT_FILE_NAME = ${RESULT_DIR}/MouseReactomePathways_Rel_83_070423.gmt
+PROTEIN_ID_TO_TOPIC = ${RESULT_DIR}/ProteinIdToTopic${DATE}.txt
+GENE_TO_TOPIC = ${RESULT_DIR}/ProteinNameToTopics${DATE}.txt
+GENE_TO_TOPIC_WITH_KEGG = ${RESULT_DIR}/ProteinNameToTopics${DATE}_With_KEGG.txt
+# This file is used to copy the mapping from genes to KEGG pathways so that
+# users of ReactomeFIViz can still do KEGG pathway enrichment analysis
+PRE_GENE_TO_TOPIC = ${RESULT_DIR}/../2022/ProteinNameToTopics070423.txt
+REACTOME_GMT_FILE_NAME = ${RESULT_DIR}/ReactomePathways_Rel_${REACTOME_RELEASE}_${DATE}.gmt
+MOUSE_REACTOME_GMT_FILE_NAME = ${RESULT_DIR}/MouseReactomePathways_Rel_${REACTOME_RELEASE}_${DATE}.gmt
 # From 2022, the cutoff value is for the score predicted by the trained random forest
 # It is much higher than 0.50 to keep the precision similar to the NBC.
 # Including "=" during the checking.
 #CUT_OFF_VALUE=0.89d
-PREDICTED_FI_FILE=${RESULT_DIR}/PredictedFIs_070423.txt
+PREDICTED_FI_FILE=${RESULT_DIR}/PredictedFIs_${DATE}.txt
 
 # Used to control the UniProt version
 UNIPROT_DIR=${DATA_SET_DIR}/UniProt/release_2024_02/
@@ -113,7 +121,7 @@ ENSEMBL_COMPARA_DATABASE=ensembl_compara_101
 ENSEMBL_PROTEIN_FAMILIES=${ENSEMBL_DIR}/ProteinFamilies.txt
 #ENSEMBL_PROTEIN_FAMILIES=${ENSEMBL_DIR}/ProteinFamilies_Zebrafish.txt
 # For GO related files
-GO_DIR=${DATA_SET_DIR}/GO/${DATE}/
+GO_DIR=${DATA_SET_DIR}/GO/04152024/
 GOA_FILE_NAME=${GO_DIR}/goa_human.gaf
 # ENCODE data
 ENCODE_DIR=${DATA_SET_DIR}/encode

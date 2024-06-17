@@ -5,7 +5,10 @@
 package org.reactome.fi;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -39,6 +42,42 @@ public class CytoscapePlugInFileHandler {
     private final String WEB_DIR = "/Users/wug/git/FIVizWS_corews/src/main/webapp/WEB-INF/";
     
     public CytoscapePlugInFileHandler() {
+    }
+    
+    /**
+     * We will add the mapping from genes to KEGG pathways so that users can perform pathway enrichment
+     * analysis for KEGG pathways. The mapping file should NOT be released to the public!
+     * @throws IOException
+     */
+    @Test
+    public void addKeggGeneToPathways() throws IOException {
+        logger.info("Add genes to KEGG pathways...");
+        // Examples of files to be used.
+//        GENE_TO_TOPIC = ${RESULT_DIR}/ProteinNameToTopics${DATE}.txt
+//                GENE_TO_TOPIC_WITH_KEGG = ${RESULT_DIR}/ProteinNameToTopics${DATE}_With_KEGG.txt
+//                # This file is used to copy the mapping from genes to KEGG pathways so that
+//                # users of ReactomeFIViz can still do KEGG pathway enrichment analysis
+//                PRE_GENE_TO_TOPIC = ${RESULT_DIR}/../2022/ProteinNameToTopics070423.txt
+        String preGeneToTopic = FIConfiguration.getConfiguration().get("PRE_GENE_TO_TOPIC");
+        String geneToTopic = FIConfiguration.getConfiguration().get("GENE_TO_TOPIC");
+        String geneToTopicWithKEGG = FIConfiguration.getConfiguration().get("GENE_TO_TOPIC_WITH_KEGG");
+        FileUtility fu = new FileUtility();
+        // First copy the file
+        fu.copy(new File(geneToTopic), new File(geneToTopicWithKEGG));
+        // Extract the old mapping
+        fu.setInput(preGeneToTopic);
+        // Need append
+        FileOutputStream fos = new FileOutputStream(new File(geneToTopicWithKEGG), true);
+        PrintWriter pr = new PrintWriter(fos);
+        String line = null;
+        while ((line = fu.readLine()) != null) {
+            if (line.endsWith("(K)")) {
+                pr.println(line);
+            }
+        }
+        fu.close();
+        pr.close();
+        logger.info("Done.");
     }
     
     @Test
@@ -106,6 +145,7 @@ public class CytoscapePlugInFileHandler {
         copyFiles();
         generateConfigurationFile();
         copyFIHibernateConfigFile();
+        addKeggGeneToPathways();
     }
     
     /**
@@ -258,10 +298,10 @@ public class CytoscapePlugInFileHandler {
     private void copyFiles() throws IOException {
         FIConfiguration config = FIConfiguration.getConfiguration();
         String[] srcFileNames = new String[] {
-                config.get("GO_DIR") + "gene_association.goa_human",
+                config.get("GOA_FILE_NAME"),
                 config.get("GO_DIR") + "GO.terms_and_ids.txt",
-                config.get("KEGG_DIR") + "map_title.tab",
-                config.get("KEGG_HSA_KGML_DIR") + "hsa.list",
+//                config.get("KEGG_DIR") + "map_title.tab",
+//                config.get("KEGG_HSA_KGML_DIR") + "hsa.list",
                 "resources" + File.separator + "InteractionTypeMapper.xml",
                 "resources" + File.separator + "mcl_script.sh", // This is needed for mcl clustering
                 "resources" + File.separator + "CGISurvivalAnalysis.R"
@@ -269,8 +309,8 @@ public class CytoscapePlugInFileHandler {
         String[] targetNames = new String[] {
                 "gene_association.goa_human",
                 "GO.terms_and_ids.txt",
-                "kegg_map_title.tab",
-                "kegg_hsa.list",
+//                "kegg_map_title.tab",
+//                "kegg_hsa.list",
                 "InteractionTypeMapper.xml",
                 "mcl_script.sh",
                 "CGISurvivalAnalysis.R"

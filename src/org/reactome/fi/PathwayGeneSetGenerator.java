@@ -62,7 +62,8 @@ public class PathwayGeneSetGenerator {
     public void generateProteinNameToPathwayMap() throws Exception {
         generateIdToTopicMap();
         generateNameToTopicMap();
-        fixKeggPathwayGeneSets();
+        // As of version 2024, no KEGG pathways any more!!!
+//        fixKeggPathwayGeneSets();
     }
     
     @Test

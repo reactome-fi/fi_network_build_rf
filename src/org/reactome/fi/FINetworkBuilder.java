@@ -262,7 +262,8 @@ public class FINetworkBuilder {
     public void compareFilesToPreviousVersion() throws IOException {
         FIConfiguration config = FIConfiguration.getConfiguration();
         String year = config.get("YEAR");
-        String preYear = (new Integer(year) - 1) + "";
+        // 2022 -> 2024
+        String preYear = (new Integer(year) - 2) + "";
         File dir = new File(config.get("RESULT_DIR"));
         Map<String, File> nameToFile = getNameToFile(dir);
         

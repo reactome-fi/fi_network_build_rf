@@ -34,7 +34,6 @@ import org.reactome.fi.util.FileUtility;
 import org.reactome.fi.util.InteractionUtilities;
 import org.reactome.fi.util.ReactomeUtilities;
 import org.reactome.fi.util.Value;
-import org.reactome.kegg.KeggToReactomeConverter;
 import org.reactome.weka.FeatureHandlerForV3;
 
 @SuppressWarnings("unchecked")
@@ -913,6 +912,26 @@ public class ReactomeAnalyzer {
         Set<String> ids = grepIDsFromTopic(pathway);
         System.out.println("Total ids: " + ids.size());
         ids.stream().sorted().forEach(System.out::println);
+    }
+    
+    @Test
+    public void dumpReactomeHumanPathways() throws Exception {
+        PersistenceAdaptor dba = getMySQLAdaptor();
+        GKInstance homosapiens = dba.fetchInstance(48887L);
+        Collection<GKInstance> pathways = dba.fetchInstanceByAttribute(ReactomeJavaConstants.Pathway,
+                ReactomeJavaConstants.species,
+                "=", 
+                homosapiens);
+       System.out.println("Total human pathways: " + pathways.size());
+       
+       String fileName = FIConfiguration.getConfiguration().get("RESULT_DIR") + File.separator +  "ReactomeHumanPathways_04292024.txt";
+       FileUtility fu = new FileUtility();
+       fu.setOutput(fileName);
+       fu.printLine("dbId\tDisplayName");
+       for (GKInstance pathway : pathways) {
+           fu.printLine(pathway.getDBID() + "\t" + pathway.getDisplayName());
+       }
+       fu.close();
     }
     
     @Test
