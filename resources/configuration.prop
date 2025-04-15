@@ -1,21 +1,21 @@
 # This is a configuration file. Make sure all directories and files are correct
 # Skip 2023 to use 2024 directly. Make more sense.
 # Make sure no space after 2024!!!
-YEAR=2024
-# This date is used for building the FI network of 2024
-#DATE=04152024
+YEAR=2025
+# This date is used for building the FI network of 2025 (This may not be fully matched with the running date)
+DATE=04142025
 # This date is used for generating the files for Cytoscape app for 2024
-DATE=061424
+#DATE=061424
 RESULT_DIR=/Volumes/ssd/results/reactome-fi/fi_network_build_rf/${YEAR}
 # the data sets directory
 #DATA_SET_DIR=/Volumes/ssd/datasets
 # The weird format used in 2022 during the transition from NBC to RF
 #DATA_SET_DIR=/Volumes/ssd/datasets_2022_fi/fi-data
 # 2024 version consolidated all datasets into a single folder.
-DATA_SET_DIR=/Volumes/ssd/datasets_fi_rf/FI_2024
+DATA_SET_DIR=/Volumes/ssd/datasets_fi_rf/FI_2025
 
 # local database that is used as the data source
-REACTOME_RELEASE=88
+REACTOME_RELEASE=92
 REACTOME_SOURCE_DB_NAME=reactome_${REACTOME_RELEASE}_plus_i
 # To get the mouse pathways
 MOUSE_SOURCE_DB_NAME=reactome_${REACTOME_RELEASE}_plus_i
@@ -23,7 +23,7 @@ DB_USER=root
 DB_PWD=macmysql01
 
 # A snapshot of gk_central database used to copy human ReferenceGeneProducts
-REACTOME_GK_CENTRAL_DB_NAME=gk_central_04152024
+REACTOME_GK_CENTRAL_DB_NAME=gk_central_04142025
 
 # This database name should be the same as the name used in funcIntHibernate.cfg.xml
 FI_DB_NAME=FI_${YEAR}
@@ -79,7 +79,7 @@ MOUSE_REACTOME_GMT_FILE_NAME = ${RESULT_DIR}/MouseReactomePathways_Rel_${REACTOM
 PREDICTED_FI_FILE=${RESULT_DIR}/PredictedFIs_${DATE}.txt
 
 # Used to control the UniProt version
-UNIPROT_DIR=${DATA_SET_DIR}/UniProt/release_2024_02/
+UNIPROT_DIR=${DATA_SET_DIR}/UniProt/release_2025_01/
     
 # Directory for pFam
 # For 2019 version of the FI network, 32 is used. Not updated in 2019.
@@ -121,7 +121,7 @@ ENSEMBL_COMPARA_DATABASE=ensembl_compara_101
 ENSEMBL_PROTEIN_FAMILIES=${ENSEMBL_DIR}/ProteinFamilies.txt
 #ENSEMBL_PROTEIN_FAMILIES=${ENSEMBL_DIR}/ProteinFamilies_Zebrafish.txt
 # For GO related files
-GO_DIR=${DATA_SET_DIR}/GO/04152024/
+GO_DIR=${DATA_SET_DIR}/GO/${DATE}/
 GOA_FILE_NAME=${GO_DIR}/goa_human.gaf
 # ENCODE data
 ENCODE_DIR=${DATA_SET_DIR}/encode
@@ -144,9 +144,11 @@ WEBAPP_DIR=/usr/local/apache-tomcat/webapps/caBigR3WebApp2022/WEB-INF
 FACTOR_GRAPH_FILE=${RESULT_DIR}/PathwayDiagramsFactorGraphs.xml.zip
 
 # FI_2024 (0.89 for FI_2022)
-CUT_OFF_VALUE=0.89d
+#CUT_OFF_VALUE=0.89d
+# FI_2025
+CUT_OFF_VALUE=0.88d
 # Related to prediction results from the trained RF
-RF_PREDICTION_FILE = ${RESULT_DIR}/prediction_results_04202024.csv
+RF_PREDICTION_FILE = ${RESULT_DIR}/prediction_results_04152025.csv
 # The original feature file for prediction that should be used to create the FI network database
-RF_FEATURE_FILE=${RESULT_DIR}/prediction_feature_file_04152024.csv
+RF_FEATURE_FILE=${RESULT_DIR}/prediction_feature_file_04142025.csv
 PREDICTED_FI_FILE=${RESULT_DIR}/PredictedFIs_${DATE}.txt

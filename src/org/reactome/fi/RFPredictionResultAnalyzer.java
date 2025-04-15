@@ -196,7 +196,7 @@ public class RFPredictionResultAnalyzer {
     
     @Test
     public void checkThreshold() throws Exception {
-//        Starting with this version, the FI network will be based on genes since they are more likely used
+//        Starting with this version (FI_2024), the FI network will be based on genes since they are more likely used
 //        in many data analysis and visualization even though the network is actually protein-based.
         // The prediction file is in gene names. However, to follow the old FI build procedures, we need to 
         // use UniProt ids. 

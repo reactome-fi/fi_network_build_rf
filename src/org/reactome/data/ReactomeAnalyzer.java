@@ -55,6 +55,47 @@ public class ReactomeAnalyzer {
     }
     
     /**
+     * Somehow there is an old gene symbol, ANP32C, for gene ANP32CP used in some FIs. Have to manually 
+     * update ReferenceGeneProduct in the database (DB_ID 49306) by adding ANP32C as a gene name so that 
+     * synonym mapping can work without throwing null.
+     * @throws Exception
+     */
+    @Test
+    public void fixANP32CIssueForReferenceGeneProduct() throws Exception {
+        MySQLAdaptor dba = (MySQLAdaptor) getMySQLAdaptor();
+        // This should be the same since this is an  old instance
+        Long dbId = 49306L;
+        GKInstance anp32 = dba.fetchInstance(dbId);
+        if (anp32 == null) {
+            logger.error("Cannot find instance for " + dbId + ".");
+            return;
+        }
+        List<String> geneNames = anp32.getAttributeValuesList(ReactomeJavaConstants.geneName);
+        String synonym = "ANP32C";
+        if (geneNames.contains(synonym)) {
+            logger.error(synonym + " is in the geneName slot already.");
+            return;
+        }
+        // Make a change now
+        geneNames.add(synonym);
+        anp32.setAttributeValue(ReactomeJavaConstants.geneName, geneNames);
+        // Make sure just update this specific attribute. Otherwise, we may have big trouble.
+        // Start with transaction
+        try {
+            logger.info("Update the gene name of " + anp32);
+            dba.startTransaction();
+            dba.updateInstanceAttribute(anp32, ReactomeJavaConstants.geneName);
+            dba.commit();
+            // Note: We have not added IE for this update!
+            logger.info("Done");
+        }
+        catch(Exception e) {
+            logger.error("Error: " + e.getMessage(), e);
+            dba.rollback();
+        }
+    }
+    
+    /**
      * Make sure dataSourceIds are correct for the version the database.
      * @return
      */
