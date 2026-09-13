@@ -171,6 +171,13 @@
                     <target>11</target>
                 </configuration>
             </plugin>
+            <!-- Lets scripts/run_pipeline.sh invoke org.reactome.fi.PipelineRunner headlessly,
+                 e.g. mvn compile exec:java -Dexec.mainClass=org.reactome.fi.PipelineRunner -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+            </plugin>
         </plugins>
     </build>
 </project>

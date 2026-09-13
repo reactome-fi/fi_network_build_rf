@@ -124,6 +124,11 @@ public class RFPredictionResultAnalyzer {
         String[] genes = fi.split("\t");
         String gene1 = synonym2gene.get(genes[0]);
         String gene2 = synonym2gene.get(genes[1]);
+        // Either gene name isn't in the current synonym map - cannot normalize this FI.
+        // Callers already treat a null return as "skip this FI" (same as self
+        // interactions and annotated-FI matches), so this is consistent, not a workaround.
+        if (gene1 == null || gene2 == null)
+            return null;
         // Don't want to include self interaction
         if (gene1.equals(gene2))
             return null;

@@ -1,0 +1,68 @@
+# Template for build.params (which is gitignored, since it contains a local
+# MySQL password and machine-specific absolute paths). Copy this to build.params
+# and fill in real values before running any of the scripts:
+#   cp build.params.example build.params
+#
+# Single source of truth for the handful of values that change from one FI network
+# build to the next. Everything else (derived paths, DB names, etc.) is computed by
+# scripts/render_config.py from these values - don't hand-edit resources/configuration.prop,
+# resources/TREDHibernate.cfg.xml, or resources/funcIntHibernate.cfg.xml any more; edit here
+# and re-run: python3 scripts/render_config.py
+#
+# After editing this file, always re-run scripts/render_config.py.
+
+YEAR=2026
+# Nominal build date, embedded in many output file names (MMDDYYYY, matches the
+# convention already used across the project).
+DATE=09092026
+# Date the remote feature-generation run actually finished (train/test/prediction
+# feature CSVs) - can drift from DATE by however long that job took to run.
+FEATURE_FILE_DATE=09112026
+# Date the local RF training/prediction step actually runs (usually a few days
+# after FEATURE_FILE_DATE). Used for prediction_results_<date>.csv naming.
+RF_DATE=09122026
+
+# Reactome release used as the data source for this build (reactome.org quarterly release number).
+REACTOME_RELEASE=97
+# Previous year's Reactome release DB name, used only by MySQLDatabaseHandler.fixTableNameCases()
+# to fix Mac case-insensitive table names against last year's DB. Not necessarily
+# REACTOME_RELEASE-1 (Reactome releases quarterly, so more than one release may pass in a year).
+PREV_REACTOME_RELEASE=92
+
+# A snapshot of gk_central, used to copy human ReferenceGeneProducts missing from
+# the slice DB. Not derived from DATE - gk_central snapshots aren't taken on the
+# FI build's schedule, so this points at whichever real snapshot DB already exists.
+GK_CENTRAL_DB_NAME=gk_central_070926_before_migration
+
+DB_USER=root
+DB_PWD=changeme
+MYSQLDUMP=/usr/local/mysql/bin/mysqldump
+
+# Root directories; ${YEAR}/FI_${YEAR} subfolders are appended automatically.
+RESULT_ROOT=/path/to/results/reactome-fi/fi_network_build_rf
+DATASET_ROOT=/path/to/datasets_fi_rf
+
+# External dataset versions (bump these only after scripts/fetch_datasets.sh check-latest
+# confirms a newer release is actually usable - see notes in that script).
+UNIPROT_RELEASE=release_2026_03
+PFAM_RELEASE=33.1
+# Pathway (SBML/BioPAX) file version - separate version space from the ortholog
+# mapping below; PantherDB versions these independently.
+PANTHER_VERSION=3.6.5
+# Panther ortholog mapping release (used for cross-species PPI mapping to human).
+# Same as FI_2024/FI_2025 - only bump after confirming a newer release exists.
+PANTHER_ORTHOLOG_VERSION=19.0
+ENSEMBL_RELEASE=101
+BIOGRID_VERSION=4.4.232
+STRING_VERSION=v12.0
+
+# Local checkout of https://github.com/reactome-idg/fi-network-ml, used by scripts/run_ml_local.sh.
+IDG_FI_NETWORK_ML_DIR=/path/to/reactome-idg/fi-network-ml
+
+# Static, rarely-changed pointers.
+PRE_GENE_TO_TOPIC_FILE=${RESULT_ROOT}/2022/ProteinNameToTopics070423.txt
+WEBAPP_DIR=/usr/local/apache-tomcat/webapps/caBigR3WebApp2026/WEB-INF
+
+# Threshold applied to the trained random forest's prediction scores. Leave blank
+# until you've reviewed the precision/recall plot from scripts/run_ml_local.sh.
+CUT_OFF_VALUE=

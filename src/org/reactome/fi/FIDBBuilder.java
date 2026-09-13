@@ -273,13 +273,30 @@ public class FIDBBuilder extends HibernateFIPersistence {
             String acc1 = fiInUniProt.substring(0, index);
             String acc2 = fiInUniProt.substring(index + 1);
             Protein protein1 = accToProteinInDb.get(acc1);
-            if (protein1 == null)
-                protein1 = fiHelper.getProtein("UniProt:" + acc1); // All accessions are from UniProt
+            if (protein1 == null) {
+                try {
+                    protein1 = fiHelper.getProtein("UniProt:" + acc1); // All accessions are from UniProt
+                }
+                catch (IllegalStateException e) {
+                    // A handful of accessions in the gene/synonym-derived UniProt mapping can be
+                    // obsolete/merged entries with no sequence in the current UniProt release.
+                    // Skip just this one FI rather than aborting the whole predicted-FI dump.
+                    logger.warn("Skip FI " + pair + ": " + e.getMessage());
+                    continue;
+                }
+            }
             if (protein1 == null)
                 throw new IllegalStateException(acc1 + " cannot be found in UniProt!");
             Protein protein2 = accToProteinInDb.get(acc2);
-            if (protein2 == null)
-                protein2 = fiHelper.getProtein("UniProt:" + acc2);
+            if (protein2 == null) {
+                try {
+                    protein2 = fiHelper.getProtein("UniProt:" + acc2);
+                }
+                catch (IllegalStateException e) {
+                    logger.warn("Skip FI " + pair + ": " + e.getMessage());
+                    continue;
+                }
+            }
             if (protein1 == null || protein2 == null)
                 throw new IllegalStateException(acc2 + " cannot be found in UniProt!");
             Interaction interaction = new Interaction();

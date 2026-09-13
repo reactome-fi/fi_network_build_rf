@@ -3,3 +3,12 @@
 /.DS_Store
 /tmp
 
+/target/
+/.build_env.sh
+/logs/
+# Contains a local MySQL password and machine-specific absolute paths - copy
+# build.params.example to build.params and fill in real values instead.
+/build.params
+# Not open-source - obtain a copy separately and place it here; must never be
+# pushed to the public GitHub mirror of this repo.
+/data_archive/nci_pid/
