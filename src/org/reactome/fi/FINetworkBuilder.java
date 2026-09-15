@@ -263,7 +263,8 @@ public class FINetworkBuilder {
         FIConfiguration config = FIConfiguration.getConfiguration();
         String year = config.get("YEAR");
         // 2022 -> 2024
-        String preYear = (new Integer(year) - 2) + "";
+        // 2025 -> 2024
+        String preYear = (new Integer(year) - 1) + "";
         File dir = new File(config.get("RESULT_DIR"));
         Map<String, File> nameToFile = getNameToFile(dir);
         
